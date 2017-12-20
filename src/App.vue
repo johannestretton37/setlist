@@ -1,8 +1,6 @@
 <template>
   <div id="app">
-    <SetList
-      v-bind:setlist="setlist">
-    </SetList>
+    <SetList :setListIndex="0"></SetList>
     <img src="./assets/logo.png">
   </div>
 </template>
@@ -10,25 +8,16 @@
 <script>
 import SetList from './components/SetList'
 import Songs from './components/Songs'
+import store from './Store'
 
 export default {
   name: 'app',
+  store,
   components: {
     SetList,
     Songs
-  },
-  data () {
-    return {
-      setlist: {
-        name: 'Setlist 1',
-        songs: [
-          { id: 0, title: 'Song Item 1', duration: 193 },
-          { id: 1, title: 'Song Item 2', duration: 122 }
-        ]
-      }
-    }
   }
-};
+}
 </script>
 
 <style lang="scss">
