@@ -14,7 +14,7 @@
 
 <script>
 export default {
-  name: "Song",
+  name: 'Song',
   props: [
     'song',
     'order'
@@ -27,7 +27,7 @@ export default {
       return `${minutes}:${seconds}`
     }
   }
-};
+}
 </script>
 
 <style lang="scss" scoped>
