@@ -5,10 +5,10 @@
       <form @submit.prevent="addSong" class="song-items-container">
         <h2>Add new song</h2>
         <div class="song-item-container">
-          <input class="center" v-model="newSongArtist" placeholder="Artist (optional)" style="grid-column: 2 / 3" />
+          <input class="center" v-model="newSongArtist" placeholder="Artist (optional)" style="grid-column: 2 / 5" />
         </div>
         <div class="song-item-container">
-          <input class="center" v-model="newSongTitle" placeholder="Song Title" style="grid-column: 2 / 3" />
+          <input class="center" v-model="newSongTitle" placeholder="Song Title" style="grid-column: 2 / 5" />
           <input class="center duration" v-model="newSongDuration" placeholder="0:00" />
         </div>
         <button>Add song to list</button>
@@ -86,7 +86,7 @@ button {
   outline: none;
   border: 1px solid #eee;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1rem 0;
   background-color: rgb(152, 188, 202);
   color: white;
   &:focus,
@@ -118,14 +118,14 @@ button {
   @extend .medium-width;
   .song-item-container {
     display: grid;
-    grid-template-columns: 100px 5fr 100px;
-    grid-gap: 0.5em;
+    grid-template-columns: 80px 1fr 2fr 1fr 80px;
+    grid-gap: 0.3em;
     padding: 0.2em 0;
   }
 }
 
 .medium-width {
-  max-width: 600px;
+  max-width: 800px;
 }
 </style>
 
