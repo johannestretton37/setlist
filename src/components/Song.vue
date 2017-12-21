@@ -1,11 +1,15 @@
 <template>
-  <li class="song-item-container">
+  <li class="song-item-container" draggable="true">
     <span class="order">
       {{ order }}
+    </span>
+    <span class="artist left">
+      {{ song.artist }}
     </span>
     <span class="title">
       {{ song.title }}
     </span>
+    <span>&nbsp;</span>
     <span>
       {{ duration }}
     </span>
@@ -32,7 +36,10 @@ export default {
 
 <style lang="scss" scoped>
 li {
-  .order {
+  .artist {
+    text-transform: uppercase;
+  }
+  .order, .artist {
     color: #999;
   }
   .title {

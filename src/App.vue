@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <SetList :setListIndex="0"></SetList>
-    <img src="./assets/logo.png">
+    <!-- <img src="./assets/logo.png"> -->
   </div>
 </template>
 
@@ -35,6 +35,9 @@ ul, li {
 }
 .center {
   text-align: center;
+}
+.left {
+  text-align: left;
 }
 .right {
   text-align: right;
