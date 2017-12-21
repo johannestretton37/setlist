@@ -14,11 +14,15 @@ setList.songs = [
 
 const store = new Vuex.Store({
   state: {
-    setLists: [setList]
+    setLists: [setList],
+    draggedItem: null
   },
   mutations: {
     addSong(state, newSong) {
       state.setLists[0].songs.push(newSong)
+    },
+    draggedItem(state, draggedItem) {
+      state.draggedItem = draggedItem
     }
   }
 })

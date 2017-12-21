@@ -1,5 +1,10 @@
 <template>
-  <li class="song-item-container">
+  <li :id="order"
+    class="song-item-container" 
+    draggable="true"
+    @dragstart="handleDragStart"
+    @drag="handleDrag"
+    @dragenter="handleDragEnter">
     <span class="order">
       {{ order }}
     </span>
@@ -19,6 +24,25 @@ export default {
     'song',
     'order'
   ],
+  methods: {
+    handleDragStart (e) {
+      e.dataTransfer.setData('text/plain', 'this.order')
+      this.$store.commit('draggedItem', this.song)
+      console.error(this.order)
+    },
+    handleDrag (e) {
+      let songId = this.$store.draggedItem
+      console.log(songId)
+    },
+    handleDragEnter (e) {
+      let songId = this.$store.draggedItem
+      console.warn(songId)
+      if (e.target.id != songId.id) {
+        e.target.style.backgroundColor = '#F0F'
+      }
+//      let songId = e.dataTransfer.getData('songId')
+    }
+  },
   computed: {
     duration: function () {
       let minutes = Math.floor(this.song.duration / 60)
