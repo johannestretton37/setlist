@@ -69,6 +69,7 @@ export default {
 </script>
 
 <style lang="scss">
+@import '../Styles/variables';
 .add-new-form {
   form {
     border: 1px solid rgb(243, 250, 252);
@@ -118,8 +119,13 @@ button {
   @extend .medium-width;
   .song-item-container {
     display: grid;
+    grid-template-rows: [preSlot] auto [songInfo] $songInfoHeight [postSlot] auto;
     grid-template-columns: 80px 1fr 2fr 1fr 80px;
-    grid-gap: 0.3em;
+    grid-template-areas:
+      'pre pre pre pre pre'
+      'order artist title . duration'
+      'post post post post post';
+    align-items: center;
     padding: 0.2em 0;
   }
 }

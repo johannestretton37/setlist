@@ -8,11 +8,9 @@
 <script>
 import SetList from './components/SetList'
 import Songs from './components/Songs'
-import store from './Store'
 
 export default {
   name: 'app',
-  store,
   components: {
     SetList,
     Songs
@@ -32,6 +30,7 @@ export default {
 ul, li {
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 .center {
   text-align: center;
