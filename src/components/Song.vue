@@ -31,7 +31,9 @@ export default {
   name: "Song",
   props: ["song", "order"],
   methods: {
-    // Dragged item events
+    /** 
+     * Dragged item events
+     */
     handleDragStart(e) {
       this.$store.commit("draggedItem", this.song)
     },
@@ -46,20 +48,25 @@ export default {
     },
     handleDragEnter(e) {
       if (e.target.className.indexOf("song-item-container") !== -1) {
-        this.$store.commit("draggingOverItemId", { id: e.target.id, slotBefore: false, slotAfter: false})
+        this.$store.commit("draggingOverItemId", { id: e.target.id, targetSlot: -1, slotPre: false, slotPost: false})
       }
     },
-    // Target (hovered) item events
+    /**
+     * Target (hovered) item events
+     */
     handleDragOver (e) {
-      const rect = e.target.getBoundingClientRect()
-      let slotBefore = false
-      let slotAfter = false
-      if (e.clientY > rect.top - 10 && e.clientY < rect.bottom - (rect.height * 0.5) - 10) {
-        slotBefore = true
-      } else if (e.clientY > rect.top + (rect.height * 0.5) + 10 && e.clientY < rect.bottom + 10) {
-        slotAfter = true
+      if (e.target.className.indexOf("song-item-container") !== -1) {
+        const rect = e.target.getBoundingClientRect()
+        let slotPre = false
+        let slotPost = false
+        if (e.clientY > rect.top && e.clientY < rect.bottom - (rect.height * 0.5)) {
+          slotPre = true
+        } else if (e.clientY > rect.top + (rect.height * 0.5) && e.clientY < rect.bottom) {
+          slotPost = true
+        }
+        let targetSlot = slotPost ? this.order : this.order - 1
+        this.$store.commit('draggingOverItemId', { id: e.target.id, targetSlot })
       }
-      this.$store.commit('draggingOverItemId', { id: e.target.id, slotBefore, slotAfter })
     }
   },
   computed: {
@@ -68,8 +75,8 @@ export default {
         blankSpot:
           this.draggedItem != null && this.song.id === this.draggedItem.id,
         draggingOver: this.draggingOverThis,
-        slotPre: this.draggingOverThis,
-        slotPost: this.draggingOverThis,
+        targetSlotPre: this.targetSlot === this.order - 1,
+        targetSlotPost: this.targetSlot === this.order
       }
     },
     duration() {
@@ -87,11 +94,8 @@ export default {
     draggingOverItemId() {
       return this.$store.state.draggingOverItemId
     },
-    slotBefore () {
-      return this.$store.state.slotBefore
-    },
-    slotAfter () {
-      return this.$store.state.slotAfter
+    targetSlot () {
+      return this.$store.state.targetSlot
     }
   }
 }
@@ -108,8 +112,23 @@ li {
       grid-area: post;
     }
     &.preSlot, &.postSlot {
-      background-color: #555;
+      transition: height 200ms linear;
+      background-color: rgb(139, 235, 248);
       height: 0px;
+    }
+  }
+  &.targetSlotPost {
+    .slot {
+      &.postSlot {
+        height: 10px;
+      }
+    }
+  }
+  &.targetSlotPre {
+    .slot {
+      &.preSlot {
+        height: 10px;
+      }
     }
   }
   .songInfo {
@@ -141,26 +160,6 @@ li {
 .blankSpot {
   opacity: 0.1;
 }
-// .draggingOver {
-//   background-color: rgba(236, 217, 155, 0.5);
-// }
-.slotBefore, .slotAfter {
-  border-color: rgba(147, 213, 240, 0);
-  border-style: solid;
-  border-left: none;
-  border-right: none;
-}
-.slotBefore {
-  border-top-color: rgba(147, 213, 240, 1);
-  border-top-width: 10px;
-  border-bottom-color: rgba(147, 213, 240, 0);
-  border-bottom-width: 0px;
-}
-.slotAfter {
-  border-top-color: rgba(147, 213, 240, 0);
-  border-top-width: 0px;
-  border-bottom-color: rgba(147, 213, 240, 1);
-  border-bottom-width: 10px;
-}
+
 </style>
 

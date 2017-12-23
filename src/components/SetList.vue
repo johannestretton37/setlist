@@ -126,7 +126,7 @@ button {
       'order artist title . duration'
       'post post post post post';
     align-items: center;
-    padding: 0.2em 0;
+    padding: 0;
   }
 }
 

@@ -19,30 +19,46 @@ setList.songs = [
 const store = new Vuex.Store({
   state: {
     setLists: [setList],
+    setListIndex: 0,
     draggedItem: null,
     draggingOverItemId: '',
-    slotBefore: false,
-    slotAfter: false
+    targetSlot: -1,
+    // slotPre: false,
+    // slotPost: false
   },
   mutations: {
     addSong(state, newSong) {
-      state.setLists[0].songs.push(newSong)
+      state.setLists[state.setListIndex].songs.push(newSong)
     },
     draggedItem(state, draggedItem) {
       state.draggedItem = draggedItem
     },
     draggedItemEnd(state) {
+      let draggedItemIndex = indexFor(state.setLists[state.setListIndex], state.draggedItem.id)
+      // Remove draggedItem from array
+      state.setLists[state.setListIndex].songs.splice(draggedItemIndex, 1)
+      // Insert draggedItem at new position.
+      // Account for offset, since we just removed an object from array
+      let offset = draggedItemIndex > state.targetSlot ? 0 : -1
+      state.setLists[state.setListIndex].songs.splice(state.targetSlot + offset, 0, state.draggedItem)
+      // Reset dragging related state variables
       state.draggedItem = null
       state.draggingOverItemId = ''
-      state.slotBefore = false
-      state.slotAfter = false
+      state.targetSlot = -1
+      state.slotPre = false
+      state.slotPost = false
     },
     draggingOverItemId(state, info) {
       state.draggingOverItemId = info.id
-      state.slotBefore = info.slotBefore
-      state.slotAfter = info.slotAfter
+      state.targetSlot = info.targetSlot
+      // state.slotPre = info.slotPre
+      // state.slotPost = info.slotPost
     }
   }
 })
+
+const indexFor = (setList, uid) => {
+  return setList.songs.findIndex(item => item.id === uid)
+}
 
 export default store
