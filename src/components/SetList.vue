@@ -1,17 +1,13 @@
 <template>
   <div>
     <h1>{{ setList.name }}</h1>
-    <div class="add-new-form">
-      <form @submit.prevent="addSong" class="song-items-container">
-        <h2>Add new song</h2>
-        <div class="song-item-container">
-          <input class="center" v-model="newSongArtist" placeholder="Artist (optional)" style="grid-column: 2 / 5" />
-        </div>
-        <div class="song-item-container">
-          <input class="center" v-model="newSongTitle" placeholder="Song Title" style="grid-column: 2 / 5" />
-          <input class="center duration" v-model="newSongDuration" placeholder="0:00" />
-        </div>
-        <button>Add song to list</button>
+    <div class="new-song-form">
+      <form @submit.prevent="addSong">
+        <h2 style="grid-area: header">Add new song</h2>
+        <input style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
+        <input style="grid-area: title" class="center" v-model="newSongTitle" placeholder="Song Title" />
+        <input style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
+        <button style="grid-area: submit">Add song to list</button>
       </form>
     </div>
 
@@ -70,8 +66,16 @@ export default {
 
 <style lang="scss">
 @import '../Styles/variables';
-.add-new-form {
+.new-song-form {
   form {
+    display: grid;
+    grid-template-rows: 1fr 0.75fr 0.75fr 0.75fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-areas:
+      'header header header header header'
+      '. title title title duration'
+      '. artist artist artist .'
+      '. . submit . .';
     border: 1px solid rgb(243, 250, 252);
     border-radius: 8px;
     background-color: rgb(237, 251, 252);

@@ -23,7 +23,8 @@ const store = new Vuex.Store({
     draggedItem: null,
     draggingOverItemId: '',
     targetSlot: -1,
-    wasMoved: ''
+    wasMoved: '',
+    isDragging: false
   },
   mutations: {
     addSong(state, newSong) {
@@ -31,6 +32,8 @@ const store = new Vuex.Store({
     },
     draggedItem(state, draggedItem) {
       state.draggedItem = draggedItem
+      state.isDragging = true
+      state.wasMoved = ''
     },
     draggedItemEnd(state) {
       if (state.draggedItem.id !== state.draggingOverItemId) {
@@ -45,6 +48,7 @@ const store = new Vuex.Store({
       }
       // Reset dragging related state variables
       state.draggedItem = null
+      state.isDragging = false
       state.draggingOverItemId = ''
       state.targetSlot = -1
     },

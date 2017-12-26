@@ -2,6 +2,7 @@
   <div id="app">
     <SetList :setListIndex="0"></SetList>
     <!-- <img src="./assets/logo.png"> -->
+    <img id="dragImg" src="/assets/dragImg.png" >
   </div>
 </template>
 

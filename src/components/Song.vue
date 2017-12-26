@@ -31,19 +31,26 @@ export default {
   name: 'Song',
   props: ['song', 'order'],
   methods: {
-    /** 
+    /**
      * Dragged item events
      */
     handleDragStart(e) {
-      e.dataTransfer.dropEffect = 'move';
-      this.$store.commit('draggedItem', this.song);
+      e.dataTransfer.dropEffect = 'move'
+      // let img = document.getElementById('dragImg')
+      // e.dataTransfer.setDragImage(img, 0, 0)
+      this.$store.commit('draggedItem', this.song)
     },
     handleDrag(e) {
-      // let draggedItem = this.draggedItem
-      // console.log(draggedItem)
+      // let placeholder = document.getElementById('draggedItemPlaceholder')
+      // let posY = e.clientY - (placeholder.getBoundingClientRect().height * 0.5) + window.pageYOffset
+      // placeholder.style.transform = `translateY(${posY}px)`
     },
     handleDragEnd(e) {
       this.$store.commit('draggedItemEnd')
+      setTimeout(() => {
+        let movedItem = document.getElementsByClassName('wasMoved')[0]
+        if (movedItem) movedItem.classList.remove('wasMoved')
+      }, 400)
       // let draggedItem = this.draggedItem
       // console.log(draggedItem)
     },
@@ -116,7 +123,10 @@ export default {
 
 <style lang="scss" scoped>
 @import "../Styles/variables";
+@import "../Styles/colors";
 li {
+  background-color: rgba(255,255,255,0.9);
+  border-radius: 8px;
   .slot {
     &.preSlot {
       grid-area: pre;
@@ -127,21 +137,21 @@ li {
     &.preSlot,
     &.postSlot {
       transition: height 200ms linear;
-      background-color: rgb(139, 235, 248);
+      background-color: $emptySlotColor;
       height: 0px;
     }
   }
   &.targetSlotPost {
     .slot {
       &.postSlot {
-        height: 10px;
+        height: 20px;
       }
     }
   }
   &.targetSlotPre {
     .slot {
       &.preSlot {
-        height: 10px;
+        height: 20px;
       }
     }
   }
@@ -166,16 +176,21 @@ li {
   .duration {
     grid-area: duration;
   }
-  border-top: 5px solid rgba(147, 213, 240, 0);
-  border-bottom: 5px solid rgba(147, 213, 240, 0);
-  transition: border 200ms linear;
 }
 .blankSpot {
-  opacity: 0.1;
+  opacity: 0.3;
 }
 
 .wasMoved {
-  background: white;
+  animation: scale-to-initial 400ms ease-out;
+}
+@keyframes scale-to-initial {
+  from {
+    transform: scale(1.3);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 </style>
 
