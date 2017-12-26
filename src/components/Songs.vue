@@ -1,15 +1,19 @@
 <template>
   <div>
-    <ul class="song-items-container">
+    <!-- <ul class="song-items-container"> -->
+    <transition-group tag="ul" class="song-items-container" name="rearrange">
       <Song
         v-for="(song, order) in songs"
         :order="order + 1"
         :key="song.id"
         :song="song">
       </Song>
-      <hr>
-      <SongsTotal v-if="songs.length > 0" :songs="songs"></SongsTotal>
-    </ul>
+      <hr :key="'divider'">
+      <SongsTotal
+        v-if="songs.length > 0"
+        :key="'total'"
+        :songs="songs"></SongsTotal>
+    </transition-group>
   </div>
 </template>
 
@@ -34,4 +38,13 @@ hr {
   border: none;
   border-bottom: 1px solid #eee;
 }
+
+.rearrange-move {
+  transition: transform 400ms;
+  &.wasMoved {
+    transition: none;
+    z-index: 999;
+  }
+}
+
 </style>

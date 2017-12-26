@@ -28,44 +28,53 @@
 
 <script>
 export default {
-  name: "Song",
-  props: ["song", "order"],
+  name: 'Song',
+  props: ['song', 'order'],
   methods: {
     /** 
      * Dragged item events
      */
     handleDragStart(e) {
-      this.$store.commit("draggedItem", this.song)
+      e.dataTransfer.dropEffect = 'move';
+      this.$store.commit('draggedItem', this.song);
     },
     handleDrag(e) {
       // let draggedItem = this.draggedItem
       // console.log(draggedItem)
     },
     handleDragEnd(e) {
-      this.$store.commit("draggedItemEnd")
+      this.$store.commit('draggedItemEnd')
       // let draggedItem = this.draggedItem
       // console.log(draggedItem)
     },
     handleDragEnter(e) {
-      if (e.target.className.indexOf("song-item-container") !== -1) {
-        this.$store.commit("draggingOverItemId", { id: e.target.id, targetSlot: -1, slotPre: false, slotPost: false})
+      if (e.target.className.indexOf('song-item-container') !== -1) {
+        this.$store.commit('draggingOverItemId', {
+          id: e.target.id,
+          targetSlot: -1,
+          slotPre: false,
+          slotPost: false
+        })
       }
     },
     /**
      * Target (hovered) item events
      */
-    handleDragOver (e) {
-      if (e.target.className.indexOf("song-item-container") !== -1) {
+    handleDragOver(e) {
+      if (e.target.className.indexOf('song-item-container') !== -1) {
         const rect = e.target.getBoundingClientRect()
-        let slotPre = false
-        let slotPost = false
-        if (e.clientY > rect.top && e.clientY < rect.bottom - (rect.height * 0.5)) {
-          slotPre = true
-        } else if (e.clientY > rect.top + (rect.height * 0.5) && e.clientY < rect.bottom) {
-          slotPost = true
+        let showEmptySlotAfterSong = false
+        if (
+          e.clientY > rect.top + rect.height * 0.5 &&
+          e.clientY < rect.bottom
+        ) {
+          showEmptySlotAfterSong = true
         }
-        let targetSlot = slotPost ? this.order : this.order - 1
-        this.$store.commit('draggingOverItemId', { id: e.target.id, targetSlot })
+        let targetSlot = showEmptySlotAfterSong ? this.order : this.order - 1
+        this.$store.commit('draggingOverItemId', {
+          id: e.target.id,
+          targetSlot
+        })
       }
     }
   },
@@ -76,7 +85,8 @@ export default {
           this.draggedItem != null && this.song.id === this.draggedItem.id,
         draggingOver: this.draggingOverThis,
         targetSlotPre: this.targetSlot === this.order - 1,
-        targetSlotPost: this.targetSlot === this.order
+        targetSlotPost: this.targetSlot === this.order,
+        wasMoved: this.wasMoved === this.song.id
       }
     },
     duration() {
@@ -88,21 +98,24 @@ export default {
     draggedItem() {
       return this.$store.state.draggedItem
     },
-    draggingOverThis () {
+    draggingOverThis() {
       return this.draggingOverItemId === this.song.id
     },
     draggingOverItemId() {
       return this.$store.state.draggingOverItemId
     },
-    targetSlot () {
+    targetSlot() {
       return this.$store.state.targetSlot
+    },
+    wasMoved() {
+      return this.$store.state.wasMoved
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import '../Styles/variables';
+@import "../Styles/variables";
 li {
   .slot {
     &.preSlot {
@@ -111,7 +124,8 @@ li {
     &.postSlot {
       grid-area: post;
     }
-    &.preSlot, &.postSlot {
+    &.preSlot,
+    &.postSlot {
       transition: height 200ms linear;
       background-color: rgb(139, 235, 248);
       height: 0px;
@@ -132,7 +146,7 @@ li {
     }
   }
   .songInfo {
-//    line-height: $songInfoHeight;
+    //    line-height: $songInfoHeight;
   }
   .artist {
     grid-area: artist;
@@ -155,11 +169,13 @@ li {
   border-top: 5px solid rgba(147, 213, 240, 0);
   border-bottom: 5px solid rgba(147, 213, 240, 0);
   transition: border 200ms linear;
-
 }
 .blankSpot {
   opacity: 0.1;
 }
 
+.wasMoved {
+  background: white;
+}
 </style>
 
