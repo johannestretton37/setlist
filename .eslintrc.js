@@ -11,19 +11,9 @@ module.exports = {
     node: true
   },
   // https://github.com/standard/standard/blob/master/docs/RULES-en.md
-  extends: 'standard',
+  extends: 'prettier',
   // required to lint *.vue files
-  plugins: [
-    'vue'
-  ],
+  plugins: ['vue'],
   // add your custom rules here
-  rules: {
-    // allow async-await
-    'generator-star-spacing': 'off',
-    // allow debugger during development
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'quotes': ['error', 'single'],
-    'semi': ['error', 'never'],
-    'space-before-function-paren': ['off']
-  }
+  rules: {}
 }
