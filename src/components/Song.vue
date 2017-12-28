@@ -1,9 +1,10 @@
 <template>
   <li
     :id="song.id"
+    :data-order="order"
     class="song-item-container" 
     :class="slotClasses"
-    draggable="true"
+    :draggable="order !== undefined"
     @dragstart="handleDragStart"
     @drag="handleDrag"
     @dragend="handleDragEnd"
@@ -31,19 +32,74 @@ export default {
   name: 'Song',
   props: ['song', 'order'],
   methods: {
+    updateItemPositions() {
+      const songs = document.getElementsByClassName('song-item-container')
+      let itemPositions = {}
+      for (let i = 0; i < songs.length; i++) {
+        const element = songs[i]
+        const id = element.id
+        const order = element.dataset.order
+        if (id) {
+          let rect = element.getBoundingClientRect()
+          itemPositions[element.id] = {
+            order,
+            top: rect.top,
+            bottom: rect.bottom,
+            height: rect.height
+          }
+        }
+      }
+      this.$store.commit('itemPositions', itemPositions)
+    },
     /**
      * Dragged item events
      */
     handleDragStart(e) {
-      e.dataTransfer.dropEffect = 'move'
-      // let img = document.getElementById('dragImg')
-      // e.dataTransfer.setDragImage(img, 0, 0)
+      // Commit state
       this.$store.commit('draggedItem', this.song)
+      // Hide drag image
+      let img = document.getElementById('dragImg')
+      img.style.display = 'block'
+      img.style.top = window.pageYOffset + 'px'
+      e.dataTransfer.setDragImage(img, 0, 0)
+      e.dataTransfer.dropEffect = 'move'
+      // Show custom drag image
+      let placeholder = document.getElementById('draggedItemPlaceholder')
+      if (placeholder) {
+        let posY =
+          e.clientY -
+          placeholder.getBoundingClientRect().height * 0.5 +
+          window.pageYOffset
+        placeholder.style.transform = `translateY(${posY}px)`
+      }
+      // Update song items positions
+      this.updateItemPositions()
     },
     handleDrag(e) {
-      // let placeholder = document.getElementById('draggedItemPlaceholder')
-      // let posY = e.clientY - (placeholder.getBoundingClientRect().height * 0.5) + window.pageYOffset
-      // placeholder.style.transform = `translateY(${posY}px)`
+      // Position placeholder
+      let placeholder = document.getElementById('draggedItemPlaceholder')
+      let posY =
+        e.clientY -
+        placeholder.getBoundingClientRect().height * 0.5 +
+        window.pageYOffset
+      placeholder.style.transform = `translateY(${posY}px)`
+      // Find what song mouse is hovering over
+      for (const id in this.itemPositions) {
+        const item = this.itemPositions[id]
+        if (e.clientY > item.top && e.clientY < item.bottom) {
+          // Is mouse position above or below item center?
+          const slotPre = e.clientY < item.top + 10 + item.height * 0.5
+          this.$store.commit('draggingOverItemId', {
+            id,
+            targetSlot: slotPre
+              ? parseInt(item.order, 10) - 1
+              : parseInt(item.order, 10),
+            slotPre,
+            slotPost: !slotPre
+          })
+          break
+        }
+      }
     },
     handleDragEnd(e) {
       this.$store.commit('draggedItemEnd')
@@ -51,38 +107,6 @@ export default {
         let movedItem = document.getElementsByClassName('wasMoved')[0]
         if (movedItem) movedItem.classList.remove('wasMoved')
       }, 400)
-      // let draggedItem = this.draggedItem
-      // console.log(draggedItem)
-    },
-    handleDragEnter(e) {
-      if (e.target.className.indexOf('song-item-container') !== -1) {
-        this.$store.commit('draggingOverItemId', {
-          id: e.target.id,
-          targetSlot: -1,
-          slotPre: false,
-          slotPost: false
-        })
-      }
-    },
-    /**
-     * Target (hovered) item events
-     */
-    handleDragOver(e) {
-      if (e.target.className.indexOf('song-item-container') !== -1) {
-        const rect = e.target.getBoundingClientRect()
-        let showEmptySlotAfterSong = false
-        if (
-          e.clientY > rect.top + rect.height * 0.5 &&
-          e.clientY < rect.bottom
-        ) {
-          showEmptySlotAfterSong = true
-        }
-        let targetSlot = showEmptySlotAfterSong ? this.order : this.order - 1
-        this.$store.commit('draggingOverItemId', {
-          id: e.target.id,
-          targetSlot
-        })
-      }
     }
   },
   computed: {
@@ -93,6 +117,7 @@ export default {
         draggingOver: this.draggingOverThis,
         targetSlotPre: this.targetSlot === this.order - 1,
         targetSlotPost: this.targetSlot === this.order,
+        draggable: this.order !== undefined,
         wasMoved: this.wasMoved === this.song.id
       }
     },
@@ -116,17 +141,23 @@ export default {
     },
     wasMoved() {
       return this.$store.state.wasMoved
+    },
+    itemPositions() {
+      return this.$store.state.itemPositions
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import "../Styles/variables";
-@import "../Styles/colors";
+@import '../Styles/variables';
+@import '../Styles/colors';
 li {
-  background-color: rgba(255,255,255,0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
+  .draggable {
+    cursor: pointer;
+  }
   .slot {
     &.preSlot {
       grid-area: pre;
@@ -142,6 +173,7 @@ li {
     }
   }
   &.targetSlotPost {
+    background: red;
     .slot {
       &.postSlot {
         height: 20px;
@@ -149,6 +181,7 @@ li {
     }
   }
   &.targetSlotPre {
+    background: blue;
     .slot {
       &.preSlot {
         height: 20px;
@@ -182,6 +215,7 @@ li {
 }
 
 .wasMoved {
+  z-index: 100;
   animation: scale-to-initial 400ms ease-out;
 }
 @keyframes scale-to-initial {

@@ -1,7 +1,7 @@
 class SetList {
-  constructor() {
+  constructor(name) {
     this.songs = []
-    this.name = ''
+    this.name = name || 'Untitled SetList'
   }
 }
 

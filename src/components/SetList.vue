@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>{{ setList.name }}</h1>
+    <h1 v-if="setList">{{ setList.name }}</h1>
     <div class="new-song-form">
       <form @submit.prevent="addSong">
         <h2 style="grid-area: header">Add new song</h2>
@@ -10,14 +10,13 @@
         <button style="grid-area: submit">Add song to list</button>
       </form>
     </div>
-
     <Songs :songs="setList.songs"></Songs>
   </div>
 </template>
 
 <script>
 import Songs from './Songs'
-import { mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 import Song from '../Models/Song'
 
 export default {
@@ -25,12 +24,9 @@ export default {
   components: {
     Songs
   },
-  computed: mapState({
-    setList(state) {
-      return state.setLists[this.setListIndex]
-    }
-  }),
-  props: ['setListIndex'],
+  computed: {
+    ...mapGetters(['setList'])
+  },
   data() {
     return {
       newSongTitle: '',
@@ -71,11 +67,8 @@ export default {
     display: grid;
     grid-template-rows: 1fr 0.75fr 0.75fr 0.75fr;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    grid-template-areas:
-      'header header header header header'
-      '. title title title duration'
-      '. artist artist artist .'
-      '. . submit . .';
+    grid-template-areas: 'header header header header header'
+      '. title title title duration' '. artist artist artist .' '. . submit . .';
     border: 1px solid rgb(243, 250, 252);
     border-radius: 8px;
     background-color: rgb(237, 251, 252);
@@ -123,11 +116,10 @@ button {
   @extend .medium-width;
   .song-item-container {
     display: grid;
-    grid-template-rows: [preSlot] auto [songInfo] $songInfoHeight [postSlot] auto;
+    grid-template-rows: [preSlot] auto [songInfo] $songInfoHeight [postSlot]
+      auto;
     grid-template-columns: 80px 1fr 2fr 1fr 80px;
-    grid-template-areas:
-      'pre pre pre pre pre'
-      'order artist title . duration'
+    grid-template-areas: 'pre pre pre pre pre' 'order artist title . duration'
       'post post post post post';
     align-items: center;
     padding: 0;

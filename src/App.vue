@@ -1,8 +1,7 @@
 <template>
   <div id="app">
-    <SetList :setListIndex="0"></SetList>
-    <!-- <img src="./assets/logo.png"> -->
-    <img id="dragImg" src="/assets/dragImg.png" >
+    <SetList></SetList>
+    <img id="dragImg" src="./assets/pixel.png">
   </div>
 </template>
 
@@ -21,14 +20,15 @@ export default {
 
 <style lang="scss">
 #app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
 }
-ul, li {
+ul,
+li {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -41,5 +41,11 @@ ul, li {
 }
 .right {
   text-align: right;
+}
+#dragImg {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 </style>

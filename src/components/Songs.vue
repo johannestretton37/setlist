@@ -1,9 +1,9 @@
 <template>
   <div class="songs">
     <!-- <ul class="song-items-container"> -->
-    <!-- <div id="draggedItemPlaceholder" v-if="isDragging">
+    <div id="draggedItemPlaceholder" v-if="isDragging">
       <Song :song="draggedItemPlaceholder"></Song>
-    </div> -->
+    </div>
     <transition-group tag="ul" class="song-items-container" name="rearrange">
       <Song
         v-for="(song, order) in songs"
@@ -22,7 +22,7 @@
 
 <script>
 import Song from './Song'
-// import SongModel from '../Models/Song'
+import SongModel from '../Models/Song'
 import SongsTotal from './SongsTotal'
 
 export default {
@@ -31,22 +31,20 @@ export default {
     Song,
     SongsTotal
   },
-  props: [
-    'songs'
-  ]
-  // computed: {
-  //   draggedItemPlaceholder() {
-  //     let draggedItemPlaceholder = new SongModel(
-  //       this.$store.state.draggedItem.title,
-  //       this.$store.state.draggedItem.artist,
-  //       this.$store.state.draggedItem.duration
-  //     )
-  //     return draggedItemPlaceholder
-  //   },
-  //   isDragging() {
-  //     return this.$store.state.isDragging
-  //   }
-  // }
+  props: ['songs'],
+  computed: {
+    draggedItemPlaceholder() {
+      let draggedItemPlaceholder = new SongModel(
+        this.$store.state.draggedItem.title,
+        this.$store.state.draggedItem.artist,
+        this.$store.state.draggedItem.duration
+      )
+      return draggedItemPlaceholder
+    },
+    isDragging() {
+      return this.$store.state.isDragging
+    }
+  }
 }
 </script>
 
@@ -64,15 +62,14 @@ hr {
   }
 }
 
-// #draggedItemPlaceholder {
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   width: 100%;
-//   background: pink;
-//   li {
-//     border: 1px solid black;
-//   }
-// }
-
+#draggedItemPlaceholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: pink;
+  li {
+    border: 1px solid black;
+  }
+}
 </style>
