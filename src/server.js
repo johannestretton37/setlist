@@ -22,6 +22,7 @@ app.use((req, res, next) => {
  */
 // Static files
 app.use('/static', express.static(path.resolve(__dirname, '../dist/static')))
+app.use('/assets', express.static(path.resolve(__dirname, '../dist/static')))
 // Api routes
 app.use('/api', apiRouter)
 // Main routes

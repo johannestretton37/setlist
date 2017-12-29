@@ -1,16 +1,22 @@
 <template>
   <div id="app">
     <SetList></SetList>
-    <img id="dragImg" src="./assets/pixel.png">
+    <img id="dragImg" :src="pixel">
   </div>
 </template>
 
 <script>
 import SetList from './components/SetList'
 import Songs from './components/Songs'
+import pixel from './assets/pixel.png'
 
 export default {
   name: 'app',
+  data: function() {
+    return {
+      pixel: pixel
+    }
+  },
   components: {
     SetList,
     Songs

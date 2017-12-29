@@ -67,9 +67,10 @@ hr {
   top: 0;
   left: 0;
   width: 100%;
-  background: pink;
+  height: 40px;
   li {
-    border: 1px solid black;
+    padding: 0.5em 0;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
   }
 }
 </style>

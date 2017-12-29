@@ -8,8 +8,10 @@
     @dragstart="handleDragStart"
     @drag="handleDrag"
     @dragend="handleDragEnd"
-    @dragenter="handleDragEnter"
-    @dragover="handleDragOver">
+    @touchstart="handleDragStart"
+    @touchmove="handleDrag"
+    @touchend="handleDragEnd"
+    @touchcancel="handleDragEnd">
     <div v-show="order == 1" class="slot preSlot"></div>
     <span class="songInfo order">
       {{ order }}
@@ -55,6 +57,9 @@ export default {
      * Dragged item events
      */
     handleDragStart(e) {
+      if (e.type.indexOf('touch') > -1) {
+        e.preventDefault()
+      }
       // Commit state
       this.$store.commit('draggedItem', this.song)
       // Hide drag image
@@ -76,6 +81,9 @@ export default {
       this.updateItemPositions()
     },
     handleDrag(e) {
+      if (e.type.indexOf('touch') > -1) {
+        e.preventDefault()
+      }
       // Position placeholder
       let placeholder = document.getElementById('draggedItemPlaceholder')
       let posY =
@@ -88,7 +96,7 @@ export default {
         const item = this.itemPositions[id]
         if (e.clientY > item.top && e.clientY < item.bottom) {
           // Is mouse position above or below item center?
-          const slotPre = e.clientY < item.top + 10 + item.height * 0.5
+          const slotPre = e.clientY < item.top + item.height * 0.5
           this.$store.commit('draggingOverItemId', {
             id,
             targetSlot: slotPre
@@ -102,6 +110,9 @@ export default {
       }
     },
     handleDragEnd(e) {
+      if (e.type.indexOf('touch') > -1) {
+        e.preventDefault()
+      }
       this.$store.commit('draggedItemEnd')
       setTimeout(() => {
         let movedItem = document.getElementsByClassName('wasMoved')[0]
@@ -152,10 +163,10 @@ export default {
 <style lang="scss" scoped>
 @import '../Styles/variables';
 @import '../Styles/colors';
-li {
+.song-item-container {
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
-  .draggable {
+  &.draggable {
     cursor: pointer;
   }
   .slot {
@@ -173,7 +184,6 @@ li {
     }
   }
   &.targetSlotPost {
-    background: red;
     .slot {
       &.postSlot {
         height: 20px;
@@ -181,7 +191,6 @@ li {
     }
   }
   &.targetSlotPre {
-    background: blue;
     .slot {
       &.preSlot {
         height: 20px;
@@ -219,10 +228,13 @@ li {
   animation: scale-to-initial 400ms ease-out;
 }
 @keyframes scale-to-initial {
-  from {
-    transform: scale(1.3);
+  0% {
+    transform: scale(1);
   }
-  to {
+  20% {
+    transform: scale(1.25);
+  }
+  100% {
     transform: scale(1);
   }
 }
