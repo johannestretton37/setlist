@@ -14,9 +14,10 @@
     "e2e": "node test/e2e/runner.js",
     "test": "yarn run unit && yarn run e2e",
     "lint": "eslint --fix --ext .js,.vue src test/unit/specs test/e2e/specs",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "gitadddist": "git add dist"
   },
-  "pre-commit": ["lint", "test", "build"],
+  "pre-commit": ["lint", "test", "build", "gitadddist"],
   "dependencies": {
     "chalk": "^2.3.0",
     "express": "^4.16.2",
