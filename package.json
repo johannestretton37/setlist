@@ -13,9 +13,10 @@
     "unit": "jest --config test/unit/jest.conf.js --coverage",
     "e2e": "node test/e2e/runner.js",
     "test": "yarn run unit && yarn run e2e",
-    "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
+    "lint": "eslint --fix --ext .js,.vue src test/unit/specs test/e2e/specs",
     "build": "node build/build.js"
   },
+  "pre-commit": ["lint", "test", "build"],
   "dependencies": {
     "chalk": "^2.3.0",
     "express": "^4.16.2",
@@ -69,6 +70,7 @@
     "portfinder": "^1.0.13",
     "postcss-import": "^11.0.0",
     "postcss-loader": "^2.0.8",
+    "pre-commit": "^1.2.2",
     "prettier": "^1.9.2",
     "prettier-eslint": "^8.7.0",
     "rimraf": "^2.6.0",

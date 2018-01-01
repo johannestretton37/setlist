@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <Scroller></Scroller>
+    <h1>SetLister</h1>
     <SetList></SetList>
     <img id="dragImg" :src="pixel">
   </div>
@@ -28,7 +29,8 @@ export default {
 </script>
 
 <style lang="scss">
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
 }
