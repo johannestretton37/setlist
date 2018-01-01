@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <Scroller></Scroller>
     <SetList></SetList>
     <img id="dragImg" :src="pixel">
   </div>
@@ -8,6 +9,7 @@
 <script>
 import SetList from './components/SetList'
 import Songs from './components/Songs'
+import Scroller from './components/Scroller'
 import pixel from './assets/pixel.png'
 
 export default {
@@ -19,12 +21,18 @@ export default {
   },
   components: {
     SetList,
-    Songs
+    Songs,
+    Scroller
   }
 }
 </script>
 
 <style lang="scss">
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

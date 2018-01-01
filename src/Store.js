@@ -20,14 +20,15 @@ let setLists = [setList]
 
 const store = new Vuex.Store({
   state: {
-    setLists: setLists,
+    setLists: [], //setLists,
     setListIndex: 0,
     draggedItem: null,
     draggingOverItemId: '',
     itemPositions: {},
     targetSlot: -1,
     wasMoved: '',
-    isDragging: false
+    isDragging: false,
+    isScrolling: false
   },
   getters: {
     setList: state => {
@@ -35,8 +36,18 @@ const store = new Vuex.Store({
     }
   },
   mutations: {
+    scroll(state, isScrolling) {
+      state.isScrolling = isScrolling
+    },
+    addSetList(state, newSetList) {
+      state.setListIndex = state.setLists.length
+      state.setLists.push(newSetList)
+    },
     addSong(state, newSong) {
-      state.setLists[state.setListIndex].songs.push(newSong)
+      this.getters.setList.songs.push(newSong)
+    },
+    deleteSong(state, id) {
+      this.getters.setList.songs = this.getters.setList.songs.filter(song => song.id !== id)
     },
     draggedItem(state, draggedItem) {
       state.draggedItem = draggedItem
@@ -44,17 +55,20 @@ const store = new Vuex.Store({
       state.wasMoved = ''
     },
     draggedItemEnd(state) {
-      if (state.draggedItem.id !== state.draggingOverItemId) {
+      if (
+        state.draggedItem &&
+        state.draggedItem.id !== state.draggingOverItemId
+      ) {
         let draggedItemIndex = indexFor(
-          state.setLists[state.setListIndex],
+          this.getters.setList,
           state.draggedItem.id
         )
         // Remove draggedItem from array
-        state.setLists[state.setListIndex].songs.splice(draggedItemIndex, 1)
+        this.getters.setList.songs.splice(draggedItemIndex, 1)
         // Insert draggedItem at new position.
         // Account for offset, since we just removed an object from array
         let offset = draggedItemIndex > state.targetSlot ? 0 : -1
-        state.setLists[state.setListIndex].songs.splice(
+        this.getters.setList.songs.splice(
           state.targetSlot + offset,
           0,
           state.draggedItem
@@ -66,6 +80,9 @@ const store = new Vuex.Store({
       state.isDragging = false
       state.draggingOverItemId = ''
       state.targetSlot = -1
+    },
+    itemWasMoved(state) {
+      state.wasMoved = ''
     },
     draggingOverItemId(state, info) {
       state.draggingOverItemId = info.id

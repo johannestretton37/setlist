@@ -2,7 +2,12 @@
   <div>
     <h1 v-if="setList">{{ setList.name }}</h1>
     <div class="new-song-form">
-      <form @submit.prevent="addSong">
+      <form v-if="setList === null" @submit.prevent="addSetList">
+        <h2 style="grid-area: header">New SetList</h2>
+        <input style="grid-area: title" class="center" v-model="newSetListTitle" placeholder="Name" />
+        <button style="grid-area: submit">Create SetList</button>
+      </form>
+      <form v-if="setList" @submit.prevent="addSong">
         <h2 style="grid-area: header">Add new song</h2>
         <input style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
         <input style="grid-area: title" class="center" v-model="newSongTitle" placeholder="Song Title" />
@@ -10,13 +15,14 @@
         <button style="grid-area: submit">Add song to list</button>
       </form>
     </div>
-    <Songs :songs="setList.songs"></Songs>
+    <Songs v-if="setList" :songs="setList.songs"></Songs>
   </div>
 </template>
 
 <script>
 import Songs from './Songs'
 import { mapGetters } from 'vuex'
+import SetList from '../Models/SetList'
 import Song from '../Models/Song'
 
 export default {
@@ -29,12 +35,17 @@ export default {
   },
   data() {
     return {
+      newSetListTitle: '',
       newSongTitle: '',
       newSongArtist: '',
       newSongDuration: ''
     }
   },
   methods: {
+    addSetList() {
+      let newSetList = new SetList(this.newSetListTitle)
+      this.$store.commit('addSetList', newSetList)
+    },
     addSong() {
       let newSong = new Song(
         this.newSongTitle,
@@ -72,7 +83,7 @@ export default {
     border: 1px solid rgb(243, 250, 252);
     border-radius: 8px;
     background-color: rgb(237, 251, 252);
-    padding: 10px 80px;
+    padding: 10px;
   }
 }
 input,
@@ -116,7 +127,7 @@ button {
   @extend .medium-width;
   .song-item-container {
     display: grid;
-    grid-template-rows: [preSlot] auto [songInfo] $songInfoHeight [postSlot]
+    grid-template-rows: [preSlot] auto [songInfo] $itemHeight * 1px [postSlot]
       auto;
     grid-template-columns: 80px 1fr 2fr 1fr 80px;
     grid-template-areas: 'pre pre pre pre pre' 'order artist title . duration'

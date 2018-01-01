@@ -11,7 +11,7 @@ module.exports = {
     node: true
   },
   // https://github.com/standard/standard/blob/master/docs/RULES-en.md
-  extends: 'prettier',
+  extends: ['prettier'],
   // required to lint *.vue files
   plugins: ['vue'],
   // add your custom rules here

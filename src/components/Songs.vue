@@ -54,6 +54,14 @@ hr {
   border-bottom: 1px solid #eee;
 }
 
+.songs {
+  ul {
+    overflow: hidden;
+    li {
+      position: relative;
+    }
+  }
+}
 .rearrange-move {
   transition: transform 400ms;
   &.wasMoved {
