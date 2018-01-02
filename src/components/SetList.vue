@@ -1,19 +1,27 @@
 <template>
   <div>
-    <h1 v-if="setList">{{ setList.name }}</h1>
+    <h2>{{ setList ? setList.name : 'SetLister' }}</h2>
     <div class="new-song-form">
-      <form v-if="setList === null" @submit.prevent="addSetList">
-        <h2 style="grid-area: header">New SetList</h2>
-        <input style="grid-area: title" class="center" v-model="newSetListTitle" placeholder="Name" />
-        <button style="grid-area: submit">Create SetList</button>
-      </form>
-      <form v-if="setList" @submit.prevent="addSong">
-        <h2 style="grid-area: header">Add new song</h2>
-        <input style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
-        <input style="grid-area: title" class="center" v-model="newSongTitle" placeholder="Song Title" />
-        <input style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
-        <button style="grid-area: submit">Add song to list</button>
-      </form>
+      <transition appear name="fade-right-to-left">
+        <form
+          v-if="setList === null"
+          key="addSetList"
+          @submit.prevent="addSetList">
+          <h3 style="grid-area: header">New SetList</h3>
+          <input style="grid-area: title" class="center" autofocus v-model="newSetListTitle" placeholder="Name" />
+          <button style="grid-area: submit">Create SetList</button>
+        </form>
+        <form
+          v-else
+          key="addNewSong"
+          @submit.prevent="addSong">
+          <h3 style="grid-area: header">Add new song</h3>
+          <input style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
+          <input style="grid-area: title" class="center" autofocus v-model="newSongTitle" placeholder="Song Title" />
+          <input style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
+          <button style="grid-area: submit">Add song to list</button>
+        </form>
+      </transition>
     </div>
     <Songs v-if="setList" :songs="setList.songs"></Songs>
   </div>
@@ -45,6 +53,7 @@ export default {
     addSetList() {
       let newSetList = new SetList(this.newSetListTitle)
       this.$store.commit('addSetList', newSetList)
+      this.resetForm()
     },
     addSong() {
       let newSong = new Song(
@@ -53,6 +62,13 @@ export default {
         this.toSeconds(this.newSongDuration)
       )
       this.$store.commit('addSong', newSong)
+      this.resetForm()
+    },
+    resetForm() {
+      this.newSetListTitle = ''
+      this.newSongTitle = ''
+      this.newSongArtist = ''
+      this.newSongDuration = ''
     },
     toSeconds: function(input) {
       if (input === '') return 0
@@ -73,9 +89,13 @@ export default {
 
 <style lang="scss">
 @import '../Styles/variables';
+@import '../Styles/animations';
 .new-song-form {
+  position: relative;
   form {
     display: grid;
+    position: relative;
+    width: 100%;
     grid-template-rows: 1fr 0.75fr 0.75fr 0.75fr;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     grid-template-areas: 'header header header header header'
@@ -83,7 +103,7 @@ export default {
     border: 1px solid rgb(243, 250, 252);
     border-radius: 8px;
     background-color: rgb(237, 251, 252);
-    padding: 10px;
+    padding: 10px 0;
   }
 }
 input,

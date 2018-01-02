@@ -1,0 +1,17 @@
+.fade-right-to-left {
+  &-enter-active,
+  &-leave-active {
+    position: absolute !important;
+    transition: opacity 800ms ease-out, transform 400ms ease-out;
+  }
+  &-enter,
+  &-leave-to {
+    opacity: 0;
+  }
+  &-enter {
+    transform: translateX(300px);
+  }
+  &-leave-to {
+    transform: translateX(-500px);
+  }
+}

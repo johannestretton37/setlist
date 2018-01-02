@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <Scroller></Scroller>
     <h1>SetLister</h1>
+    <Scroller></Scroller>
     <SetList></SetList>
     <img id="dragImg" :src="pixel">
   </div>
