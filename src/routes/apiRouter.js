@@ -1,30 +1,81 @@
 const express = require('express')
 const router = express.Router()
 const chalk = require('chalk')
-const log = function() { console.log(chalk.cyan('|'), ...arguments) }
+const log = function() {
+  console.log(chalk.cyan('|'), ...arguments)
+}
+
+/***** MOCKUP START *****/
+let setList = {
+  name: 'Setlist 1',
+  songs: [
+    {
+      id: 'randomId1',
+      title: 'Song nr 1',
+      artist: 'Artist',
+      duration: 193
+    },
+    {
+      id: 'randomId2',
+      title: 'Song 2',
+      artist: 'Blur',
+      duration: 142
+    },
+    {
+      id: 'randomId3',
+      title: 'Song nr 3',
+      artist: 'Artdsdft',
+      duration: 344
+    },
+    {
+      id: 'randomId4',
+      title: 'Song 4',
+      artist: 'sdfdf',
+      duration: 31
+    },
+    {
+      id: 'randomId5',
+      title: 'Song nr 5',
+      artist: 'Artistdfsf',
+      duration: 993
+    },
+    {
+      id: 'randomId6',
+      title: 'Song 6',
+      artist: 'gwrf',
+      duration: 747
+    }
+  ]
+}
+
+let setLists = [setList]
+/****** MOCKUP END ******/
 
 /**
  * '/api'
  */
+router.route('/setlists').get((req, res) => {
+  res.json(setLists)
+})
+
 router.get('/', (req, res) => {
-  res.json({ response: 'api success' })
+  res.json({ response: 'api success', data: 'main route: /' })
 })
 
 // Validate `user` parameter
 router.param('user', (req, res, next, user) => {
   log('Validating', user)
-  
+
   // Validate here
   // ...
-  
+
   // Save validated user to request
   req.user = user.toUpperCase()
   next()
 })
 
-router.route('/auth/:user')
-  .get((req, res) => {
-    res.json({ response: `Please, authenticate yourself, ${req.user}` })
-  })
+router.route('/auth/:user').get((req, res) => {
+  res.json({ response: `Please, authenticate yourself, ${req.user}` })
+})
 
 module.exports = router

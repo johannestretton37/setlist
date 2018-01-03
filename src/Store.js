@@ -5,22 +5,9 @@ import Song from './Models/Song'
 
 Vue.use(Vuex)
 
-/***** MOCKUP START *****/
-let setList = new SetList('Setlist 1')
-setList.songs = [
-  new Song('Song nr 1', 'Artist', 193),
-  new Song('Song 2', 'Blur', 142),
-  new Song('Song nr 3', 'Artdsdft', 344),
-  new Song('Song 4', 'sdfdf', 31),
-  new Song('Song nr 5', 'Artistdfsf', 993),
-  new Song('Song 6', 'gwrf', 747)
-]
-let setLists = [setList]
-/****** MOCKUP END ******/
-
 const store = new Vuex.Store({
   state: {
-    setLists: [], //setLists,
+    setLists: [],
     setListIndex: 0,
     draggedItem: null,
     draggingOverItemId: '',
@@ -36,6 +23,9 @@ const store = new Vuex.Store({
     }
   },
   mutations: {
+    loadSetLists(state, setLists) {
+      state.setLists = setLists
+    },
     scroll(state, isScrolling) {
       state.isScrolling = isScrolling
     },
@@ -47,7 +37,9 @@ const store = new Vuex.Store({
       this.getters.setList.songs.push(newSong)
     },
     deleteSong(state, id) {
-      this.getters.setList.songs = this.getters.setList.songs.filter(song => song.id !== id)
+      this.getters.setList.songs = this.getters.setList.songs.filter(
+        song => song.id !== id
+      )
     },
     draggedItem(state, draggedItem) {
       state.draggedItem = draggedItem

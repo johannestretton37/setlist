@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h1>SetLister</h1>
+    <h1>SetLister 0.0.3</h1>
     <Scroller></Scroller>
     <SetList></SetList>
     <img id="dragImg" :src="pixel">
@@ -12,6 +12,7 @@ import SetList from './components/SetList'
 import Songs from './components/Songs'
 import Scroller from './components/Scroller'
 import pixel from './assets/pixel.png'
+import axios from 'axios'
 
 export default {
   name: 'app',
@@ -24,6 +25,14 @@ export default {
     SetList,
     Songs,
     Scroller
+  },
+  async created() {
+    try {
+      let response = await axios.get('/api/setlists')
+      this.$store.commit('loadSetLists', response.data)
+    } catch (err) {
+      console.log(err)
+    }
   }
 }
 </script>
@@ -33,6 +42,9 @@ html,
 body {
   margin: 0;
   padding: 0;
+}
+* {
+  box-sizing: border-box;
 }
 
 #app {

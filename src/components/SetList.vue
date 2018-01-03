@@ -1,24 +1,28 @@
 <template>
   <div>
-    <h2>{{ setList ? setList.name : 'SetLister' }}</h2>
+    <h2>{{ setList ? setList.name : this.newSetListTitle || 'Welcome' }}</h2>
     <div class="new-song-form">
-      <transition appear name="fade-right-to-left">
+      <transition
+        name="fade-right-to-left"
+        v-on:after-enter="afterEnter">
         <form
           v-if="setList === null"
           key="addSetList"
+          class="add-setlist-form"
           @submit.prevent="addSetList">
           <h3 style="grid-area: header">New SetList</h3>
-          <input style="grid-area: title" class="center" autofocus v-model="newSetListTitle" placeholder="Name" />
+          <input type="text" style="grid-area: title" class="center" autofocus v-model="newSetListTitle" placeholder="Name" />
           <button style="grid-area: submit">Create SetList</button>
         </form>
         <form
           v-else
           key="addNewSong"
+          class="add-song-form"
           @submit.prevent="addSong">
           <h3 style="grid-area: header">Add new song</h3>
-          <input style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
-          <input style="grid-area: title" class="center" autofocus v-model="newSongTitle" placeholder="Song Title" />
-          <input style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
+          <input type="text" style="grid-area: title" class="center" autofocus v-model="newSongTitle" placeholder="Song Title" />
+          <input type="text" style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
+          <input type="text" style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
           <button style="grid-area: submit">Add song to list</button>
         </form>
       </transition>
@@ -69,6 +73,11 @@ export default {
       this.newSongTitle = ''
       this.newSongArtist = ''
       this.newSongDuration = ''
+      document.activeElement.blur()
+    },
+    afterEnter(element) {
+      let initialInput = element.querySelector('input[autofocus]')
+      initialInput.focus()
     },
     toSeconds: function(input) {
       if (input === '') return 0
@@ -96,10 +105,18 @@ export default {
     display: grid;
     position: relative;
     width: 100%;
-    grid-template-rows: 1fr 0.75fr 0.75fr 0.75fr;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    grid-template-areas: 'header header header header header'
-      '. title title title duration' '. artist artist artist .' '. . submit . .';
+    justify-content: center;
+    grid-gap: 0.3em;
+    grid-template-rows: 1fr auto auto auto auto;
+    grid-template-columns: 20px 1fr 20px;
+    grid-template-areas: '. header .' '. title .' '. duration. ' '. artist .'
+      '. submit .';
+    @media screen and (min-width: 480px) {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      grid-template-areas: 'header header header header header'
+        '. title title title duration' '. artist artist artist .'
+        '. . submit . .';
+    }
     border: 1px solid rgb(243, 250, 252);
     border-radius: 8px;
     background-color: rgb(237, 251, 252);
@@ -118,11 +135,16 @@ button {
   padding: 1rem 0;
   background-color: rgb(152, 188, 202);
   color: white;
+  transition: all 300ms ease-out;
   &:focus,
   &:active {
     color: #000;
+    background-color: rgb(173, 214, 230);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.7) inset;
+    border: 1px solid rgb(162, 226, 252);
   }
   &.duration {
+    color: rgb(19, 46, 61);
     background-color: rgba(152, 188, 202, 0.3);
   }
   &.empty {

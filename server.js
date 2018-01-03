@@ -1,14 +1,14 @@
 const express = require('express')
 const app = express()
-const port = process.env.PORT || 8080
-const mainRouter = require('./routes/mainRouter')
-const apiRouter = require('./routes/apiRouter')
+const port = process.env.PORT || 8081
+const mainRouter = require('./src/routes/mainRouter')
+const apiRouter = require('./src/routes/apiRouter')
 const path = require('path')
 const chalk = require('chalk')
 const log = function() {
   console.log(chalk.cyan('|'), ...arguments)
 }
-
+console.log('init server')
 /**
  * Log requests
  */
