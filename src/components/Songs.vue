@@ -1,9 +1,5 @@
 <template>
   <div class="songs">
-    <!-- <ul class="song-items-container"> -->
-    <div id="draggedItemPlaceholder" v-if="isDragging">
-      <Song :song="draggedItemPlaceholder"></Song>
-    </div>
     <transition-group tag="ul" class="song-items-container" name="rearrange">
       <Song
         v-for="(song, order) in songs"
@@ -17,6 +13,9 @@
         :key="'total'"
         :songs="songs"></SongsTotal>
     </transition-group>
+    <div id="draggedItemPlaceholder" v-if="isDragging">
+      <Song :song="draggedItemPlaceholder"></Song>
+    </div>
   </div>
 </template>
 
@@ -76,6 +75,7 @@ hr {
   left: 0;
   width: 100%;
   height: 40px;
+  z-index: 9999;
   li {
     padding: 0.5em 0;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);

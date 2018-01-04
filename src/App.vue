@@ -29,7 +29,9 @@ export default {
   async created() {
     try {
       let response = await axios.get('/api/setlists')
-      this.$store.commit('loadSetLists', response.data)
+      setTimeout(() => {
+        this.$store.commit('loadSetLists', response.data)
+      }, 2000)
     } catch (err) {
       console.log(err)
     }

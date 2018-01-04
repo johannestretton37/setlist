@@ -105,6 +105,10 @@ export default {
     display: grid;
     position: relative;
     width: 100%;
+    background-color: rgb(237, 251, 252);
+    border: 1px solid rgb(243, 250, 252);
+    border-radius: 8px;
+    padding: 10px 0;
     justify-content: center;
     grid-gap: 0.3em;
     grid-template-rows: 1fr auto auto auto auto;
@@ -117,10 +121,11 @@ export default {
         '. title title title duration' '. artist artist artist .'
         '. . submit . .';
     }
-    border: 1px solid rgb(243, 250, 252);
-    border-radius: 8px;
-    background-color: rgb(237, 251, 252);
-    padding: 10px 0;
+    @media screen and (min-width: 960px) {
+      margin: auto;
+      width: 960px;
+      background: none;
+    }
   }
 }
 input,
