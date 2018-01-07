@@ -4,6 +4,7 @@
     <div class="new-song-form">
       <transition
         name="fade-right-to-left"
+        v-on:enter="onEnter"
         v-on:after-enter="afterEnter">
         <form
           v-if="setList === null"
@@ -20,9 +21,9 @@
           class="add-song-form"
           @submit.prevent="addSong">
           <h3 style="grid-area: header">Add new song</h3>
-          <input type="text" style="grid-area: title" class="center" autofocus v-model="newSongTitle" placeholder="Song Title" />
-          <input type="text" style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
-          <input type="text" style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
+          <input type="text" @input="handleInput" data-model="songTitle" style="grid-area: title" class="center" autofocus v-model="newSongTitle" placeholder="Song Title" />
+          <input type="text" @input="handleInput" data-model="songDuration" style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
+          <input type="text" @input="handleInput" data-model="songArtist" style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
           <button style="grid-area: submit">Add song to list</button>
         </form>
       </transition>
@@ -47,6 +48,7 @@ export default {
   },
   data() {
     return {
+      idleTimer: null,
       newSetListTitle: '',
       newSongTitle: '',
       newSongArtist: '',
@@ -58,6 +60,34 @@ export default {
       let newSetList = new SetList(this.newSetListTitle)
       this.$store.commit('addSetList', newSetList)
       this.resetForm()
+    },
+    handleInput(e) {
+      this.startIdleTimer(e.target)
+      const input = e.target.value
+      switch (e.target.dataset.model) {
+        case 'songTitle':
+          if (input.length > 2) {
+            console.log('Searching for', input)
+            this.stopIdleTimer()
+          }
+          break
+      }
+    },
+    handleBlur(e) {
+      this.stopIdleTimer()
+    },
+    startIdleTimer(target) {
+      this.stopIdleTimer()
+      // let target = target
+      this.idleTimer = setTimeout(() => {
+        if (this.idleTimer) {
+          this.stopIdleTimer()
+          console.log('User idle, performing search for:', target.value)
+        }
+      }, 2000)
+    },
+    stopIdleTimer() {
+      clearTimeout(this.idleTimer)
     },
     addSong() {
       let newSong = new Song(
@@ -74,6 +104,10 @@ export default {
       this.newSongArtist = ''
       this.newSongDuration = ''
       document.activeElement.blur()
+    },
+    onEnter(element) {
+      document.querySelector('.new-song-form').style.height =
+        element.getBoundingClientRect().height + 'px'
     },
     afterEnter(element) {
       let initialInput = element.querySelector('input[autofocus]')

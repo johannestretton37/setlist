@@ -28,10 +28,11 @@ export default {
   },
   async created() {
     try {
-      let response = await axios.get('/api/setlists')
-      setTimeout(() => {
-        this.$store.commit('loadSetLists', response.data)
-      }, 2000)
+      let response = await axios.get('/search/Let%20it%20be')
+      // let response = await axios.get('/api/setlists')
+      // setTimeout(() => {
+      //   this.$store.commit('loadSetLists', response.data)
+      // }, 1500)
     } catch (err) {
       console.log(err)
     }

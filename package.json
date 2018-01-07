@@ -25,7 +25,9 @@
   "dependencies": {
     "axios": "^0.17.1",
     "chalk": "^2.3.0",
+    "dotenv": "^4.0.0",
     "express": "^4.16.2",
+    "spotify-web-api-node": "^2.5.0",
     "uid": "^0.0.2",
     "vue": "^2.5.2",
     "vuex": "^3.0.1"
