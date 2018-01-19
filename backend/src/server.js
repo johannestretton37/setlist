@@ -52,6 +52,23 @@ app.use((req, res, next) => {
   next()
 })
 
+app.isAuthenticated = function() {
+  if (app.locals.email) {
+    log('isAuthenticated:', app.locals.email)
+    app.locals.authenticated = true
+    return true
+  } else {
+    log('isAuthenticated:', false)
+    app.locals.authenticated = false
+    return false
+  }
+}
+
+app.use((req, res, next) => {
+  app.isAuthenticated()
+  next()
+})
+
 /**
  * Setup routes
  */

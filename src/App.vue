@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <h1>SetLister 0.0.3</h1>
+    <a :href="spotifyLoginUrl">Login to Spotify</a>
     <Scroller></Scroller>
     <SetList></SetList>
     <img id="dragImg" :src="pixel">
@@ -18,7 +19,8 @@ export default {
   name: 'app',
   data: function() {
     return {
-      pixel: pixel
+      pixel: pixel,
+      spotifyLoginUrl: `https://accounts.spotify.com/authorize/?client_id=${process.env.SPOTIFY_CLIENT_ID}&response_type=code&redirect_uri=${process.env.REDIRECT_URI_ENC}&scope=playlist-modify-public%20user-read-email&state=spotifylogin`
     }
   },
   components: {
@@ -27,15 +29,17 @@ export default {
     Scroller
   },
   async created() {
-    try {
-      let response = await axios.get('/search/Let%20it%20be')
-      // let response = await axios.get('/api/setlists')
-      // setTimeout(() => {
-      //   this.$store.commit('loadSetLists', response.data)
-      // }, 1500)
-    } catch (err) {
-      console.log(err)
-    }
+    // try {
+    //   // let response = await axios.get('/search/Let%20it%20be')
+    //   // let response = await axios.get('/api/setlists')
+    //   // setTimeout(() => {
+    //   //   this.$store.commit('loadSetLists', response.data)
+    //   // }, 1500)
+    //   // Log user in
+    //   axios.get(url).then(res => console.log(res))
+    // } catch (err) {
+    //   console.log(err)
+    // }
   }
 }
 </script>

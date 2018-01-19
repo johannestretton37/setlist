@@ -75,9 +75,8 @@ const createSetList = async setList => {
 }
 
 const addSong = async song => {
-  const songsDoc = await setListRef.collection('songs').add(song)
-  log('song added with id:', songsDoc.id)
-  log('song added with ref:', songsDoc.ref)
+  const songDoc = await setListRef.collection('songs').add(song)
+  log('song added with id:', songDoc.id)
 }
 
 const getSetLists = async userId => {
@@ -123,9 +122,9 @@ let exampleSetList = {
   }
 }
 let exampleSong = {
-  title: 'Diamonds',
-  artist: 'Prince',
-  duration: 687
+  title: 'Smaragds',
+  artist: 'King',
+  duration: 562
 }
 // createSetList(exampleSetList)
 // addSong(exampleSong)
