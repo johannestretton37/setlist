@@ -17,9 +17,9 @@
     "lint": "eslint --fix --ext .js,.vue src test/unit/specs test/e2e/specs",
     "build": "node build/build.js",
     "build:backend": "babel backend/src -d backenddist --presets env",
-    "gitadddist": "git add dist"
+    "gitadddist": "git add dist backenddist"
   },
-  "pre-commit": ["lint", "test", "build", "gitadddist"],
+  "pre-commit": ["lint", "test", "build", "build:backend", "gitadddist"],
   "dependencies": {
     "axios": "^0.17.1",
     "chalk": "^2.3.0",

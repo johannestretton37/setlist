@@ -4,6 +4,8 @@ var _firebaseBackend = require('./firebaseBackend');
 
 var _firebaseBackend2 = _interopRequireDefault(_firebaseBackend);
 
+require('firebase/firestore');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 require('dotenv').config();
@@ -23,11 +25,55 @@ var log = function log() {
   (_console = console).log.apply(_console, [chalk.cyan('|')].concat(Array.prototype.slice.call(arguments)));
 };
 console.log('init server');
+
+// Init users
+var users = {};
+// Load users from database
+var db = _firebaseBackend2.default.firestore();
+db.collection('users').get().then(function (querySnapshot) {
+  querySnapshot.forEach(function (doc) {
+    var user = doc.data();
+    users[doc.id] = user;
+    log('User ' + doc.id + ' => ' + user.first + ' ' + user.last);
+  });
+});
+
+// db
+//   .collection('users')
+//   .add({
+//     first: 'Ada',
+//     last: 'Lovelace',
+//     born: 1815
+//   })
+//   .then(function(docRef) {
+//     console.log('Document written with ID: ', docRef.id)
+//   })
+//   .catch(function(error) {
+//     console.error('Error adding document: ', error)
+//   })
+
 /**
  * Log requests
  */
 app.use(function (req, res, next) {
   log(chalk.black.bgYellow(req.method), chalk.yellow(req.url));
+  next();
+});
+
+app.isAuthenticated = function () {
+  if (app.locals.email) {
+    log('isAuthenticated:', app.locals.email);
+    app.locals.authenticated = true;
+    return true;
+  } else {
+    log('isAuthenticated:', false);
+    app.locals.authenticated = false;
+    return false;
+  }
+};
+
+app.use(function (req, res, next) {
+  app.isAuthenticated();
   next();
 });
 

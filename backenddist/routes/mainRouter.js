@@ -12,6 +12,7 @@ var log = function log() {
 
 // MAIN ROUTE '/'
 router.route('/').get(function (req, res) {
+  log('locals:', req.app.locals.email);
   res.sendFile(path.resolve(__dirname, '../../dist', 'index.html'));
 });
 
