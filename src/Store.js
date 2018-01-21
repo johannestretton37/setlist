@@ -2,11 +2,13 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import SetList from './Models/SetList'
 import Song from './Models/Song'
+import firebase from 'firebase'
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
+    user: undefined,
     setLists: [],
     setListIndex: 0,
     draggedItem: null,
@@ -23,7 +25,44 @@ const store = new Vuex.Store({
     }
   },
   mutations: {
+    loggedIn(state, user) {
+      state.user = user
+      console.log('Looking for setlists for', user.uid)
+      const db = firebase.firestore()
+      db
+        .collection('setlists')
+        .where(`users.${user.uid}`, '==', true)
+        .get()
+        .then(async setListSnapshot => {
+          let promises = []
+          let setLists = []
+          setListSnapshot.forEach(setlistDoc => {
+            // Loop through setlists
+            const setListData = setlistDoc.data()
+            let songsPromise = setlistDoc.ref
+              .collection('songs')
+              .get()
+              .then(snapshot => {
+                let setList = SetList.setListFromDocData(setListData)
+                snapshot.forEach(songDoc => {
+                  // Loop through songs
+                  const songData = songDoc.data()
+                  let song = Song.songFromDocData(songData)
+                  setList.songs.push(song)
+                })
+                setLists.push(setList)
+              })
+            promises.push(songsPromise)
+          })
+          await Promise.all(promises)
+          this.commit('loadSetLists', setLists)
+        })
+    },
+    loggedOut(state) {
+      state.user = undefined
+    },
     loadSetLists(state, setLists) {
+      console.log('commit loadSetLists()')
       state.setLists = setLists
     },
     scroll(state, isScrolling) {

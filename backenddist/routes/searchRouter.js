@@ -20,13 +20,14 @@ var spotifyApi = void 0;
 
 function initSpotifyApi() {
   if (!spotifyApi) {
+    log('initSpotifyApi() start');
     spotifyApi = new SpotifyWebApi({
       clientId: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
       redirectUri: process.env.NODE_ENV == 'development' ? process.env.LOCAL_REDIRECT_URI : process.env.REDIRECT_URI
     });
   }
-  log('initSpotifyApi');
+  log('initSpotifyApi() complete');
 }
 
 function initSpotifyApiSearch() {
@@ -58,8 +59,7 @@ router.route('/callback').get(function (req, res, next) {
   // https://jaybo-setlister.herokuapp.com/?code=AQAY9Kiz7ApEShBN9Bmyxj4IfGrNArsXWKojVzF_cyr0ToZFxNLSxVwM3NEgFjHRxsi23z2SohSMMbcIIjVk09KZVpdeIdAF3jZ3ryoWJrXAH39cEo7xIxRaknOh9XqWz3w1RRDVvqQHgaBmxeTttzSjSDQsOhql1tOBIGt-SUxz1lVBi3ZPNeXhZVq_5aQqBsiB20Lh0ZZ7uokpgWzKpfEnblOkFDkF4CqSjnF5p_7lf7a59GMtFpAsDk3ZwV-x&state=thisisthestate
   var state = req.query.state;
   var authorizationCode = req.query.code;
-  log(state);
-  log(authorizationCode);
+  log('state:', state);
 
   /* Set the credentials given on Spotify's My Applications page.
    * https://developer.spotify.com/my-applications
@@ -78,17 +78,9 @@ router.route('/callback').get(function (req, res, next) {
     // "Retrieved data for Faruk Sahin"
     console.log('Retrieved data for ' + data.body['display_name']);
     console.log(data.body);
-    var email = data.body.email;
-    // "Email is farukemresahin@gmail.com"
-    // console.log('Email is ' + data.body.email)
-
-    // // "Image URL is http://media.giphy.com/media/Aab07O5PYOmQ/giphy.gif"
-    // console.log('Image URL is ' + data.body.images[0].url)
-
-    // // "This user has a premium account"
-    // console.log('This user has a ' + data.body.product + ' account')
-    res.app.locals.email = email;
-    log(res.app.locals.email);
+    var spotifyId = data.body.id;
+    res.app.locals.spotifyId = spotifyId;
+    log(res.app.locals.spotifyId);
     log('redirecting to /');
     res.redirect('/');
   }).catch(function (err) {

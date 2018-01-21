@@ -1,61 +1,13 @@
 import express from 'express'
-import firebase from '../firebaseBackend'
+import firebase from 'firebase'
 import chalk from 'chalk'
-import 'firebase/firestore'
 const router = express.Router()
+import 'firebase/firestore'
 const db = firebase.firestore()
 
 const log = function() {
   console.log(chalk.cyan('|'), ...arguments)
 }
-
-/***** MOCKUP START *****/
-/*
-let setList = {
-  name: 'Setlist 1',
-  songs: [
-    {
-      id: 'randomId1',
-      title: 'Song nr 1',
-      artist: 'Artist',
-      duration: 193
-    },
-    {
-      id: 'randomId2',
-      title: 'Song 2',
-      artist: 'Blur',
-      duration: 142
-    },
-    {
-      id: 'randomId3',
-      title: 'Song nr 3',
-      artist: 'Artdsdft',
-      duration: 344
-    },
-    {
-      id: 'randomId4',
-      title: 'Song 4',
-      artist: 'sdfdf',
-      duration: 31
-    },
-    {
-      id: 'randomId5',
-      title: 'Song nr 5',
-      artist: 'Artistdfsf',
-      duration: 993
-    },
-    {
-      id: 'randomId6',
-      title: 'Song 6',
-      artist: 'gwrf',
-      duration: 747
-    }
-  ]
-}
-
-let setLists = [setList]
-*/
-/****** MOCKUP END ******/
 
 /****** firebase cloud start ******/
 /**
@@ -65,54 +17,54 @@ let setLists = [setList]
  *          |__ song [doc]
  *
  */
-let setListsRef = db.collection('setlists')
-let setListRef = setListsRef.doc('FRxLwlVoLkKmBzXUrgGC')
-const createSetList = async setList => {
-  const setListDoc = await setListsRef.add(setList)
-  setListRef = setListDoc
-  log('created with id:', setListDoc.id)
-  log('created with ref:', setListDoc.ref)
-}
+// let setListsRef = db.collection('setlists')
+// let setListRef = setListsRef.doc('FRxLwlVoLkKmBzXUrgGC')
+// const createSetList = async setList => {
+//   const setListDoc = await setListsRef.add(setList)
+//   setListRef = setListDoc
+//   log('created with id:', setListDoc.id)
+//   log('created with ref:', setListDoc.ref)
+// }
 
-const addSong = async song => {
-  const songDoc = await setListRef.collection('songs').add(song)
-  log('song added with id:', songDoc.id)
-}
+// const addSong = async song => {
+//   const songDoc = await setListRef.collection('songs').add(song)
+//   log('song added with id:', songDoc.id)
+// }
 
-const getSetLists = async userId => {
-  return new Promise(async (resolve, reject) => {
-    let snapshot = await setListsRef.where(`users.${userId}`, '==', true).get()
-    if (snapshot) {
-      let setLists = []
-      let promises = []
-      snapshot.forEach(setListDoc => {
-        let setList = {
-          id: setListDoc.id,
-          ...setListDoc.data(),
-          songs: []
-        }
-        setLists.push(setList)
-        promises.push(
-          setListDoc.ref
-            .collection('songs')
-            .get()
-            .then(songs => {
-              songs.forEach(song => {
-                setList.songs.push({
-                  id: song.id,
-                  ...song.data()
-                })
-              })
-            })
-        )
-      })
-      await Promise.all(promises)
-      resolve(setLists)
-    } else {
-      log('There are no setlists yet')
-    }
-  })
-}
+// const getSetLists = async userId => {
+//   return new Promise(async (resolve, reject) => {
+//     let snapshot = await setListsRef.where(`users.${userId}`, '==', true).get()
+//     if (snapshot) {
+//       let setLists = []
+//       let promises = []
+//       snapshot.forEach(setListDoc => {
+//         let setList = {
+//           id: setListDoc.id,
+//           ...setListDoc.data(),
+//           songs: []
+//         }
+//         setLists.push(setList)
+//         promises.push(
+//           setListDoc.ref
+//             .collection('songs')
+//             .get()
+//             .then(songs => {
+//               songs.forEach(song => {
+//                 setList.songs.push({
+//                   id: song.id,
+//                   ...song.data()
+//                 })
+//               })
+//             })
+//         )
+//       })
+//       await Promise.all(promises)
+//       resolve(setLists)
+//     } else {
+//       log('There are no setlists yet')
+//     }
+//   })
+// }
 
 let exampleSetList = {
   title: 'Kraken 2017',

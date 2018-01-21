@@ -1,34 +1,33 @@
 require('dotenv').config()
-const express = require('express')
-const app = express()
+import express from 'express'
+import mainRouter from './routes/mainRouter'
+import apiRouter from './routes/apiRouter'
+import searchRouter from './routes/searchRouter'
+import firebase from 'firebase'
+import path from 'path'
+import chalk from 'chalk'
+
 const port = process.env.PORT || 8081
-const mainRouter = require('./routes/mainRouter')
-const apiRouter = require('./routes/apiRouter')
-const searchRouter = require('./routes/searchRouter')
-const path = require('path')
-const chalk = require('chalk')
-import firebase from './firebaseBackend'
-import 'firebase/firestore'
+const app = express()
 
 const log = function() {
   console.log(chalk.cyan('|'), ...arguments)
 }
-console.log('init server')
 
-// Init users
-let users = {}
-// Load users from database
-const db = firebase.firestore()
-db
-  .collection('users')
-  .get()
-  .then(querySnapshot => {
-    querySnapshot.forEach(doc => {
-      let user = doc.data()
-      users[doc.id] = user
-      log(`User ${doc.id} => ${user.first} ${user.last}`)
-    })
-  })
+// // Init users
+// let users = {}
+// // Load users from database
+// const db = firebase.firestore()
+// db
+//   .collection('users')
+//   .get()
+//   .then(querySnapshot => {
+//     querySnapshot.forEach(doc => {
+//       let user = doc.data()
+//       users[doc.id] = user
+//       log(`User ${doc.id} => ${user.first} ${user.last}`)
+//     })
+//   })
 
 // db
 //   .collection('users')
@@ -53,8 +52,8 @@ app.use((req, res, next) => {
 })
 
 app.isAuthenticated = function() {
-  if (app.locals.email) {
-    log('isAuthenticated:', app.locals.email)
+  if (app.locals.spotifyId) {
+    log('isAuthenticated:', app.locals.spotifyId)
     app.locals.authenticated = true
     return true
   } else {
@@ -72,7 +71,6 @@ app.isAuthenticated = function() {
 /**
  * Setup routes
  */
-console.log(path.resolve(__dirname, '../', 'dist', './static'))
 // Static files
 app.use(
   '/static',

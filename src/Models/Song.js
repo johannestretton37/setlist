@@ -8,6 +8,11 @@ class Song {
     this.duration = duration
     this.isEncore = isEncore || false
   }
+
+  static songFromDocData = data => {
+    let song = new Song(data.title, data.artist, data.duration, false)
+    return song
+  }
 }
 
 export default Song

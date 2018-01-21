@@ -1,42 +1,61 @@
 'use strict';
 
-var _firebaseBackend = require('./firebaseBackend');
+var _express = require('express');
 
-var _firebaseBackend2 = _interopRequireDefault(_firebaseBackend);
+var _express2 = _interopRequireDefault(_express);
 
-require('firebase/firestore');
+var _mainRouter = require('./routes/mainRouter');
+
+var _mainRouter2 = _interopRequireDefault(_mainRouter);
+
+var _apiRouter = require('./routes/apiRouter');
+
+var _apiRouter2 = _interopRequireDefault(_apiRouter);
+
+var _searchRouter = require('./routes/searchRouter');
+
+var _searchRouter2 = _interopRequireDefault(_searchRouter);
+
+var _firebase = require('firebase');
+
+var _firebase2 = _interopRequireDefault(_firebase);
+
+var _path = require('path');
+
+var _path2 = _interopRequireDefault(_path);
+
+var _chalk = require('chalk');
+
+var _chalk2 = _interopRequireDefault(_chalk);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 require('dotenv').config();
-var express = require('express');
-var app = express();
-var port = process.env.PORT || 8081;
-var mainRouter = require('./routes/mainRouter');
-var apiRouter = require('./routes/apiRouter');
-var searchRouter = require('./routes/searchRouter');
-var path = require('path');
-var chalk = require('chalk');
 
+
+var port = process.env.PORT || 8081;
+var app = (0, _express2.default)();
 
 var log = function log() {
   var _console;
 
-  (_console = console).log.apply(_console, [chalk.cyan('|')].concat(Array.prototype.slice.call(arguments)));
+  (_console = console).log.apply(_console, [_chalk2.default.cyan('|')].concat(Array.prototype.slice.call(arguments)));
 };
-console.log('init server');
 
-// Init users
-var users = {};
-// Load users from database
-var db = _firebaseBackend2.default.firestore();
-db.collection('users').get().then(function (querySnapshot) {
-  querySnapshot.forEach(function (doc) {
-    var user = doc.data();
-    users[doc.id] = user;
-    log('User ' + doc.id + ' => ' + user.first + ' ' + user.last);
-  });
-});
+// // Init users
+// let users = {}
+// // Load users from database
+// const db = firebase.firestore()
+// db
+//   .collection('users')
+//   .get()
+//   .then(querySnapshot => {
+//     querySnapshot.forEach(doc => {
+//       let user = doc.data()
+//       users[doc.id] = user
+//       log(`User ${doc.id} => ${user.first} ${user.last}`)
+//     })
+//   })
 
 // db
 //   .collection('users')
@@ -56,13 +75,13 @@ db.collection('users').get().then(function (querySnapshot) {
  * Log requests
  */
 app.use(function (req, res, next) {
-  log(chalk.black.bgYellow(req.method), chalk.yellow(req.url));
+  log(_chalk2.default.black.bgYellow(req.method), _chalk2.default.yellow(req.url));
   next();
 });
 
 app.isAuthenticated = function () {
-  if (app.locals.email) {
-    log('isAuthenticated:', app.locals.email);
+  if (app.locals.spotifyId) {
+    log('isAuthenticated:', app.locals.spotifyId);
     app.locals.authenticated = true;
     return true;
   } else {
@@ -80,20 +99,19 @@ app.isAuthenticated = function () {
 /**
  * Setup routes
  */
-console.log(path.resolve(__dirname, '../', 'dist', './static'));
 // Static files
-app.use('/static', express.static(path.resolve(__dirname, '../', 'dist', './static')));
-app.use('/assets', express.static(path.resolve(__dirname, '../', 'dist', './static')));
+app.use('/static', _express2.default.static(_path2.default.resolve(__dirname, '../', 'dist', './static')));
+app.use('/assets', _express2.default.static(_path2.default.resolve(__dirname, '../', 'dist', './static')));
 // Api routes
-app.use('/api', apiRouter);
+app.use('/api', _apiRouter2.default);
 // Search routes
-app.use('/search', searchRouter);
+app.use('/search', _searchRouter2.default);
 // Main routes
-app.use('/', mainRouter);
+app.use('/', _mainRouter2.default);
 
 /**
  * Start Server
  */
 app.listen(port, function () {
-  return console.log(chalk.cyan(' _______________________________\n|'), 'API Server listening on port ' + port, chalk.cyan('|'));
+  return console.log(_chalk2.default.cyan(' _______________________________\n|'), 'API Server listening on port ' + port, _chalk2.default.cyan('|'));
 });

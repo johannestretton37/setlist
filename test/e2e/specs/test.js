@@ -11,9 +11,9 @@ module.exports = {
     browser
       .url(devServer)
       .waitForElementVisible('#app', 5000)
-      .assert.elementPresent('.new-song-form')
-      .assert.containsText('h1', 'SetLister')
-      .assert.elementCount('img', 1)
+      // .assert.elementPresent('.new-song-form')
+      .assert.containsText('h1', 'Login')
+      // .assert.elementCount('img', 1)
       .end()
   }
 }
