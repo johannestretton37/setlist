@@ -1,0 +1,10 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /setlists/{setlist} {
+      allow read, write: if resource.data.users[request.auth.uid] == true;
+      match /songs/{song=**} {
+      	allow read, write: if true;
+      }
+    }
+  }
+}
