@@ -28,6 +28,7 @@ new Vue({
           avatar: user.photoURL
         })
         console.log('Logged in')
+        store.dispatch('getUserSetLists')
         this.$router.push('/')
       } else {
         store.commit('loggedOut')

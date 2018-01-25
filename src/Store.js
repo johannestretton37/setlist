@@ -6,11 +6,270 @@ import firebase from 'firebase'
 
 Vue.use(Vuex)
 
+const getOrCreateUser = async user => {
+  const db = firebase.firestore()
+  try {
+    debugger
+    let users = await db.collection('users')
+    debugger
+    let user = await users.doc(uid)
+    debugger
+    let userDoc = await user.get()
+    debugger
+    if (userDoc.exists) {
+      let storedUser = userDoc.data()
+      return storedUser
+    } else {
+      // create user
+      db
+        .collection('users')
+        .doc(user.uid)
+        .set(user)
+        .then(() => {
+          return user
+        })
+    }
+  } catch (error) {
+    console.log('error')
+    console.log(error)
+  }
+}
+
+const getUsersRef = async () => {
+  return new Promise(async resolve => {
+    const db = firebase.firestore()
+    try {
+      const ref = await db.collection('users')
+      return resolve(ref)
+    } catch (error) {
+      return resolve(false)
+    }
+  })
+}
+
+const getSetListsRef = async () => {
+  return new Promise(async resolve => {
+    const db = firebase.firestore()
+    try {
+      const ref = await db.collection('setlists')
+      return resolve(ref)
+    } catch (error) {
+      return resolve(false)
+    }
+  })
+}
+
+const getUsersLastSetListId = uid => {
+  return new Promise(async resolve => {
+    const usersRef = await getUsersRef()
+    if (!usersRef) return resolve(undefined)
+    try {
+      const userRef = await usersRef.doc(uid)
+      const userDoc = await userRef.get()
+      if (userDoc.exists) {
+        let user = userDoc.data()
+        return resolve(user.currentSetListId)
+      } else {
+        return resolve(undefined)
+      }
+    } catch (error) {
+      return resolve(undefined)
+    }
+  })
+}
+
+const getSetLists = async uid => {
+  const setListsRef = await getSetListsRef()
+  if (!setListsRef) return undefined
+  return setListsRef
+    .where(`users.${uid}`, '==', true)
+    .get()
+    .then(async setListSnapshot => {
+      let setLists = {}
+      let setListPromises = []
+      // Loop through setlists
+      setListSnapshot.forEach(setlistDoc => {
+        const setListData = setlistDoc.data()
+        let setList = SetList.setListFromDocData(setListData, setlistDoc.id)
+        // Get songs
+        let setListPromise = setlistDoc.ref
+          .collection('songs')
+          .get()
+          .then(snapshot => {
+            snapshot.forEach(songDoc => {
+              // Loop through songs
+              const songData = songDoc.data()
+              let song = Song.songFromDocData(songData, songDoc.id)
+              setList.songs.push(song)
+            })
+            setLists[setList.id] = setList
+          })
+        setListPromises.push(setListPromise)
+      })
+      await Promise.all(setListPromises)
+      return setLists
+    })
+}
+
+const persistCurrentSetListId = (uid, setListId) => {
+  return new Promise(async resolve => {
+    const usersRef = await getUsersRef()
+    return usersRef.doc(uid).set(
+      {
+        currentSetListId: setListId
+      },
+      {
+        merge: true
+      }
+    )
+  })
+}
+
+const allowedFields = ['title', 'subtitle', 'users']
+
+/**
+ * Persist SetList to firestore
+ *
+ * Note that this will not delete songs, only add or
+ * modify/update them.
+ *
+ * @param {string} setListId
+ * @param {object} props - The properties to save
+ */
+const persistSetList = (setListId, props) => {
+  return new Promise(async resolve => {
+    const setListsRef = await getSetListsRef()
+    if (!setListsRef) return resolve(undefined)
+    let setListDoc = {}
+    Object.entries(props).forEach(([key, val]) => {
+      if (allowedFields.includes(key)) {
+        switch (key) {
+          case 'users':
+            console.log('ignore users for now')
+            break
+          default:
+            setListDoc[key] = val
+            break
+        }
+      }
+    })
+
+    const db = firebase.firestore()
+    let batch = db.batch()
+    batch.set(setListsRef.doc(setListId), setListDoc, { merge: true })
+
+    if (props.songs) {
+      // Sort stored songs in an array
+      const storedSongsCollection = await setListsRef
+        .doc(setListId)
+        .collection('songs')
+        .orderBy('index')
+        .get()
+      let storedSongs = []
+      storedSongsCollection.forEach(snapshot => {
+        let storedSong = snapshot.data()
+        storedSong.id = snapshot.id
+        storedSongs.push(storedSong)
+      })
+
+      let songsToStore = {}
+      let i = 0
+      storedSongs.forEach(storedSong => {
+        const localSong = props.songs[i]
+        if (localSong) {
+          // Compare
+          console.log('comparing:')
+          console.table([storedSong.index, localSong.index])
+          if (
+            storedSong.id !== localSong.id ||
+            storedSong.index !== localSong.index
+          ) {
+            console.log('These are not the same:')
+            console.table([storedSong, localSong])
+            console.log('DELETE stored song')
+            let docRef = setListsRef
+              .doc(setListId)
+              .collection('songs')
+              .doc(`${i}`)
+            batch.delete(docRef)
+            let { id, index, ...rest } = localSong
+            batch.set(docRef, { index: i, ...rest })
+          }
+        }
+        i++
+      })
+
+      if (props.songs.length > i) {
+        let songsToAdd = props.songs.splice(i)
+        console.log(songsToAdd.length, 'songs were added:', songsToAdd)
+        songsToAdd.forEach((song, x) => {
+          console.log('Add song with index', x + i)
+          let { id, index, ...rest } = song
+          let docRef = setListsRef
+            .doc(setListId)
+            .collection('songs')
+            .doc(`${x + i}`)
+          batch.set(docRef, { index: x + i, ...rest })
+        })
+      } else {
+        console.log('No more songs...', props.songs)
+      }
+    }
+    return batch.commit()
+  })
+}
+
+const watchSetList = setListId => {
+  getSetListsRef().then(ref => {
+    // Watch setList
+    ref.doc(setListId).onSnapshot(setList => {
+      if (!setList.metadata.fromCache) {
+        console.log('[SETLIST]  === UPDATE UI ===')
+        console.log(setList.data())
+      } else {
+        console.log('[SETLIST] local update only')
+      }
+    })
+    // Watch setLists's songs
+    ref
+      .doc(setListId)
+      .collection('songs')
+      .onSnapshot(snapshot => {
+        snapshot.docChanges.forEach(change => {
+          if (!change.doc.metadata.fromCache) {
+            console.log('[SONGS]  === UPDATE UI ===')
+            if (change.type === 'added') {
+              console.log('New song: ', change.doc.data())
+              const songDoc = change.doc.data()
+              let song = Song.songFromDocData(songDoc, songDoc.id)
+              console.log(store)
+              store.commit('addSong', song)
+            }
+            if (change.type === 'modified') {
+              const songDoc = change.doc.data()
+              let song = Song.songFromDocData(songDoc, songDoc.id)
+              store.commit('editSong', song)
+              console.log('Modified song: ', song)
+            }
+            if (change.type === 'removed') {
+              const songDoc = change.doc.data()
+              let song = Song.songFromDocData(songDoc, songDoc.id)
+              store.commit('deleteSong', song.id)
+              console.log('Removed song: ', song)
+            }
+          } else {
+            console.log('[SONGS] local update only')
+          }
+        })
+      })
+  })
+}
+
 const store = new Vuex.Store({
   state: {
     user: undefined,
-    setLists: [],
-    setListIndex: 0,
+    setLists: {},
+    setListId: '',
     draggedItem: null,
     draggingOverItemId: '',
     itemPositions: {},
@@ -21,59 +280,58 @@ const store = new Vuex.Store({
   },
   getters: {
     setList: state => {
-      return state.setLists[state.setListIndex] || null
+      return state.setLists[state.setListId] || null
+    }
+  },
+  actions: {
+    getUserSetLists: async ({ state, commit }) => {
+      let setLists = await getSetLists(state.user.uid)
+      if (setLists) {
+        let setListId = await getUsersLastSetListId(state.user.uid)
+        if (!setListId) {
+          setListId = Object.keys(setLists)[0]
+          persistCurrentSetListId(state.user.uid, setListId)
+        }
+        commit('loadSetLists', setLists)
+        commit('openSetList', setListId)
+      } else {
+        console.warn('No setlists found')
+      }
     }
   },
   mutations: {
     loggedIn(state, user) {
       state.user = user
-      console.log('Looking for setlists for', user.uid)
-      const db = firebase.firestore()
-      db
-        .collection('setlists')
-        .where(`users.${user.uid}`, '==', true)
-        .get()
-        .then(async setListSnapshot => {
-          let promises = []
-          let setLists = []
-          setListSnapshot.forEach(setlistDoc => {
-            // Loop through setlists
-            const setListData = setlistDoc.data()
-            let songsPromise = setlistDoc.ref
-              .collection('songs')
-              .get()
-              .then(snapshot => {
-                let setList = SetList.setListFromDocData(setListData)
-                snapshot.forEach(songDoc => {
-                  // Loop through songs
-                  const songData = songDoc.data()
-                  let song = Song.songFromDocData(songData)
-                  setList.songs.push(song)
-                })
-                setLists.push(setList)
-              })
-            promises.push(songsPromise)
-          })
-          await Promise.all(promises)
-          this.commit('loadSetLists', setLists)
-        })
     },
     loggedOut(state) {
       state.user = undefined
+      state.setLists = {}
+      state.setListId = ''
+    },
+    openSetList(state, setListId) {
+      watchSetList(setListId)
+      state.setListId = setListId
     },
     loadSetLists(state, setLists) {
-      console.log('commit loadSetLists()')
       state.setLists = setLists
     },
     scroll(state, isScrolling) {
       state.isScrolling = isScrolling
     },
     addSetList(state, newSetList) {
-      state.setListIndex = state.setLists.length
-      state.setLists.push(newSetList)
+      state.setLists[newSetList.id] = newSetList
+      state.setListId = newSetList.id
     },
     addSong(state, newSong) {
-      this.getters.setList.songs.push(newSong)
+      state.setLists[state.setListId].songs.splice(newSong.index, 0, newSong)
+      persistSetList(state.setListId, setList)
+    },
+    editSong(state, updatedSong) {
+      state.setLists[state.setListId].songs.splice(
+        updatedSong.index,
+        1,
+        updatedSong
+      )
     },
     deleteSong(state, id) {
       this.getters.setList.songs = this.getters.setList.songs.filter(

@@ -1,12 +1,13 @@
 class SetList {
-  constructor(name, subtitle, songs) {
-    this.name = name || 'Untitled SetList'
+  constructor(title, subtitle, songs) {
+    this.title = title || 'Untitled SetList'
     this.subtitle = subtitle || ''
     this.songs = songs || []
   }
 
-  static setListFromDocData = data => {
+  static setListFromDocData = (data, id) => {
     let setList = new SetList(data.title, data.subtitle, data.songs)
+    setList.id = id
     return setList
   }
 }

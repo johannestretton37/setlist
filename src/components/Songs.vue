@@ -4,7 +4,7 @@
       <Song
         v-for="(song, order) in songs"
         :order="order + 1"
-        :key="song.id"
+        :key="song.index"
         :song="song">
       </Song>
       <hr :key="'divider'">
@@ -34,6 +34,7 @@ export default {
   computed: {
     draggedItemPlaceholder() {
       let draggedItemPlaceholder = new SongModel(
+        this.$store.state.draggedItem.index,
         this.$store.state.draggedItem.title,
         this.$store.state.draggedItem.artist,
         this.$store.state.draggedItem.duration

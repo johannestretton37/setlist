@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>{{ setList ? setList.name : this.newSetListTitle || 'Welcome' }}</h2>
+    <h2>{{ setList ? setList.title : this.newSetListTitle || 'Welcome' }}</h2>
     <div class="new-song-form">
       <transition
         name="fade-right-to-left"
@@ -91,6 +91,7 @@ export default {
     },
     addSong() {
       let newSong = new Song(
+        this.setList.songs.length,
         this.newSongTitle,
         this.newSongArtist,
         this.toSeconds(this.newSongDuration)
@@ -147,11 +148,13 @@ export default {
     grid-gap: 0.3em;
     grid-template-rows: 1fr auto auto auto auto;
     grid-template-columns: 20px 1fr 20px;
-    grid-template-areas: '. header .' '. title .' '. duration. ' '. artist .'
+    grid-template-areas:
+      '. header .' '. title .' '. duration. ' '. artist .'
       '. submit .';
     @media screen and (min-width: 480px) {
       grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-      grid-template-areas: 'header header header header header'
+      grid-template-areas:
+        'header header header header header'
         '. title title title duration' '. artist artist artist .'
         '. . submit . .';
     }
@@ -208,10 +211,12 @@ button {
   @extend .medium-width;
   .song-item-container {
     display: grid;
-    grid-template-rows: [preSlot] auto [songInfo] $itemHeight * 1px [postSlot]
+    grid-template-rows:
+      [preSlot] auto [songInfo] $itemHeight * 1px [postSlot]
       auto;
     grid-template-columns: 80px 1fr 2fr 1fr 80px;
-    grid-template-areas: 'pre pre pre pre pre' 'order artist title . duration'
+    grid-template-areas:
+      'pre pre pre pre pre' 'order artist title . duration'
       'post post post post post';
     align-items: center;
     padding: 0;
@@ -222,4 +227,3 @@ button {
   max-width: 800px;
 }
 </style>
-
