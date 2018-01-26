@@ -8,9 +8,9 @@
         v-on:after-enter="afterEnter">
         <form
           v-if="setList === null"
-          key="addSetList"
+          key="createSetList"
           class="add-setlist-form"
-          @submit.prevent="addSetList">
+          @submit.prevent="createSetList">
           <h3 style="grid-area: header">New SetList</h3>
           <input type="text" style="grid-area: title" class="center" autofocus v-model="newSetListTitle" placeholder="Name" />
           <button style="grid-area: submit">Create SetList</button>
@@ -56,9 +56,9 @@ export default {
     }
   },
   methods: {
-    addSetList() {
+    createSetList() {
       let newSetList = new SetList(this.newSetListTitle)
-      this.$store.commit('addSetList', newSetList)
+      this.$store.dispatch('createSetList', newSetList)
       this.resetForm()
     },
     handleInput(e) {

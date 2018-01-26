@@ -12,7 +12,7 @@ const getOrCreateUser = async user => {
     debugger
     let users = await db.collection('users')
     debugger
-    let user = await users.doc(uid)
+    let user = await users.doc(user.uid)
     debugger
     let userDoc = await user.get()
     debugger
@@ -125,13 +125,19 @@ const persistCurrentSetListId = (uid, setListId) => {
   })
 }
 
+const deleteCurrentSetListId = uid => {
+  return new Promise(async resolve => {
+    const usersRef = await getUsersRef()
+    return usersRef.doc(uid).update({
+      currentSetListId: firebase.firestore.FieldValue.delete()
+    })
+  })
+}
+
 const allowedFields = ['title', 'subtitle', 'users']
 
 /**
  * Persist SetList to firestore
- *
- * Note that this will not delete songs, only add or
- * modify/update them.
  *
  * @param {string} setListId
  * @param {object} props - The properties to save
@@ -222,10 +228,12 @@ const persistSetList = (setListId, props) => {
 const watchSetList = setListId => {
   getSetListsRef().then(ref => {
     // Watch setList
-    ref.doc(setListId).onSnapshot(setList => {
-      if (!setList.metadata.fromCache) {
+    ref.doc(setListId).onSnapshot(setListDoc => {
+      if (!setListDoc.metadata.fromCache) {
         console.log('[SETLIST]  === UPDATE UI ===')
-        console.log(setList.data())
+        const setList = setListDoc.data()
+        console.log(setList)
+        store.commit('loadSetList', setList)
       } else {
         console.log('[SETLIST] local update only')
       }
@@ -284,13 +292,34 @@ const store = new Vuex.Store({
     }
   },
   actions: {
+    createSetList: async ({ state, commit }, newSetList) => {
+      let setListsRef = await getSetListsRef()
+      let newSetListRef = await setListsRef.add({
+        title: newSetList.title,
+        subtitle: newSetList.subtitle,
+        users: {
+          [state.user.uid]: true
+        }
+      })
+      const newSetListDoc = await newSetListRef.get()
+      const setList = newSetListDoc.data()
+      const setListId = newSetListRef.id
+      commit('loadSetList', setList)
+      commit('openSetList', setListId)
+    },
     getUserSetLists: async ({ state, commit }) => {
       let setLists = await getSetLists(state.user.uid)
-      if (setLists) {
+      if (Object.keys(setLists).length > 0) {
         let setListId = await getUsersLastSetListId(state.user.uid)
         if (!setListId) {
           setListId = Object.keys(setLists)[0]
-          persistCurrentSetListId(state.user.uid, setListId)
+          if (setListId) {
+            if (setLists[setListId]) {
+              persistCurrentSetListId(state.user.uid, setListId)
+            } else {
+              deleteCurrentSetListId(state.user.uid)
+            }
+          }
         }
         commit('loadSetLists', setLists)
         commit('openSetList', setListId)
@@ -312,19 +341,18 @@ const store = new Vuex.Store({
       watchSetList(setListId)
       state.setListId = setListId
     },
+    loadSetList(state, setList) {
+      state.setLists[setList.id] = setList
+    },
     loadSetLists(state, setLists) {
       state.setLists = setLists
     },
     scroll(state, isScrolling) {
       state.isScrolling = isScrolling
     },
-    addSetList(state, newSetList) {
-      state.setLists[newSetList.id] = newSetList
-      state.setListId = newSetList.id
-    },
     addSong(state, newSong) {
       state.setLists[state.setListId].songs.splice(newSong.index, 0, newSong)
-      persistSetList(state.setListId, setList)
+      persistSetList(state.setListId, state.setLists[state.setListId])
     },
     editSong(state, updatedSong) {
       state.setLists[state.setListId].songs.splice(

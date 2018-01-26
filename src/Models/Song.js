@@ -16,7 +16,7 @@ class Song {
       data.title,
       data.artist,
       data.duration,
-      false
+      data.isEncore
     )
     song.id = id
     return song
