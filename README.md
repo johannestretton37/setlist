@@ -47,7 +47,7 @@ yarn test
 # Add and commit to git, this will automatically run all tests and then build before committing
 git add . && git commit -m "<commit message here>"
 # If everything succeeds - deploy
-git push heroku master
+git push && git push heroku master
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
