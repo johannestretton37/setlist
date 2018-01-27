@@ -8,6 +8,7 @@ const log = function() {
 
 // MAIN ROUTE '/'
 router.route('/*').get((req, res) => {
+  log(req.path)
   log('spotifyId:', req.app.locals.spotifyId)
   res.sendFile(path.resolve(__dirname, '../../dist', 'index.html'))
 })

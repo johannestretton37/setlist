@@ -1,10 +1,19 @@
 <template>
-  <div>
-    <h1>SetLister 0.0.3</h1>
-    <h2 v-if="user">Welcome {{user.name}}</h2>
-    <p v-if="user">This is you: <img :src="user.avatar" style="width:30px;" /></p>
-    <button v-if="user" @click.prevent="logout">Log out</button>
-    <a :href="spotifyLoginUrl">Login to Spotify</a>
+  <div class="center-box">
+    <header>
+      <h1>SetLister</h1>
+      <p>[BETA Version]</p>
+      <div class="avatar">
+        <p v-if="user"><b>{{user.name}}</b>&nbsp;<img v-if="user" :src="user.avatar" style="width:30px;border-radius:50%;" /></p>
+        <button v-if="user" @click.prevent="logout">Log out</button>
+      </div>
+    </header>
+    <div v-if="user">
+      <p style="width:70%;margin:0.5em auto;">If you have Spotify Premium, you'll be able to save your SetList as a Spotify playlist.
+        You may also listen to music and search the Spotify library. 
+      </p>
+      <a :href="spotifyLoginUrl">Login to Spotify</a>
+    </div>
     <Scroller></Scroller>
     <SetList></SetList>
     <img id="dragImg" :src="pixel">

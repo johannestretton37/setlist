@@ -1,7 +1,8 @@
 <template>
-  <section>
-    <h1>Login</h1>
-    <div id="firebaseui-auth-container">{{status}}</div>
+  <section class="center-box">
+    <h1>Log in</h1>
+    <p>{{status}}</p>
+    <div id="firebaseui-auth-container" @mousedown="startLogIn"></div>
   </section>
 </template>
 
@@ -12,6 +13,7 @@ import Scroller from './Scroller'
 
 import firebase from 'firebase'
 import firebaseui from 'firebaseui'
+import '../../node_modules/firebaseui/dist/firebaseui.css'
 
 export default {
   name: 'login',
@@ -22,17 +24,28 @@ export default {
   },
   data() {
     return {
-      status: 'Logging in...'
+      status: 'Connecting to Google...'
+    }
+  },
+  methods: {
+    startLogIn: function() {
+      this.status = 'Logging in. Please wait...'
     }
   },
   mounted() {
     let ui = new firebaseui.auth.AuthUI(firebase.auth())
+    firebase.auth().useDeviceLanguage()
     ui.start('#firebaseui-auth-container', {
       signInSuccessUrl: '/',
       signInOptions: [
         // List of OAuth providers supported.
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
       ],
+      callbacks: {
+        uiShown: () => {
+          this.status = 'Log in with your Google account to start using the app'
+        }
+      },
       tosUrl: '/tos'
       // Other config options...
     });
@@ -91,3 +104,27 @@ export default {
 }
 </script>
 
+<style lang="scss">
+#firebaseui-auth-container {
+  .firebaseui-info-bar {
+    margin-top: 20px;
+  }
+
+  .mdl-shadow--2dp {
+    box-shadow: none;
+  }
+
+  .mdl-progress {
+    height: 5px;
+  }
+
+  div.mdl-progress::after {
+    color: rgb(37, 77, 37);
+    font-size: 1.5em;
+    content: 'Authenticating. Please wait...';
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+  }
+}
+</style>

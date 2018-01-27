@@ -139,15 +139,15 @@ const allowedFields = ['title', 'subtitle', 'users']
 /**
  * Persist SetList to firestore
  *
- * @param {string} setListId
- * @param {object} props - The properties to save
+ * @param {string} setListId - The SetList's uid
+ * @param {object} propsToChange - The properties to save as key value pairs
  */
-const persistSetList = (setListId, props) => {
+const persistSetList = (setListId, propsToChange) => {
   return new Promise(async resolve => {
     const setListsRef = await getSetListsRef()
     if (!setListsRef) return resolve(undefined)
     let setListDoc = {}
-    Object.entries(props).forEach(([key, val]) => {
+    Object.entries(propsToChange).forEach(([key, val]) => {
       if (allowedFields.includes(key)) {
         switch (key) {
           case 'users':
@@ -164,7 +164,7 @@ const persistSetList = (setListId, props) => {
     let batch = db.batch()
     batch.set(setListsRef.doc(setListId), setListDoc, { merge: true })
 
-    if (props.songs) {
+    if (propsToChange.songs) {
       // Sort stored songs in an array
       const storedSongsCollection = await setListsRef
         .doc(setListId)
@@ -181,7 +181,7 @@ const persistSetList = (setListId, props) => {
       let songsToStore = {}
       let i = 0
       storedSongs.forEach(storedSong => {
-        const localSong = props.songs[i]
+        const localSong = propsToChange.songs[i]
         if (localSong) {
           // Compare
           console.log('comparing:')
@@ -205,8 +205,8 @@ const persistSetList = (setListId, props) => {
         i++
       })
 
-      if (props.songs.length > i) {
-        let songsToAdd = props.songs.splice(i)
+      if (propsToChange.songs.length > i) {
+        let songsToAdd = propsToChange.songs.splice(i)
         console.log(songsToAdd.length, 'songs were added:', songsToAdd)
         songsToAdd.forEach((song, x) => {
           console.log('Add song with index', x + i)
@@ -218,7 +218,7 @@ const persistSetList = (setListId, props) => {
           batch.set(docRef, { index: x + i, ...rest })
         })
       } else {
-        console.log('No more songs...', props.songs)
+        console.log('No more songs...', propsToChange.songs)
       }
     }
     return batch.commit()
@@ -329,6 +329,7 @@ const store = new Vuex.Store({
     }
   },
   mutations: {
+    /* Authorization */
     loggedIn(state, user) {
       state.user = user
     },
@@ -337,39 +338,35 @@ const store = new Vuex.Store({
       state.setLists = {}
       state.setListId = ''
     },
-    openSetList(state, setListId) {
-      watchSetList(setListId)
-      state.setListId = setListId
+    /* SetList management */
+    loadSetLists(state, setLists) {
+      state.setLists = setLists
     },
     loadSetList(state, setList) {
       state.setLists[setList.id] = setList
     },
-    loadSetLists(state, setLists) {
-      state.setLists = setLists
+    openSetList(state, setListId) {
+      watchSetList(setListId)
+      state.setListId = setListId
     },
-    scroll(state, isScrolling) {
-      state.isScrolling = isScrolling
-    },
+    /* Song manipulation */
     addSong(state, newSong) {
-      state.setLists[state.setListId].songs.splice(newSong.index, 0, newSong)
-      persistSetList(state.setListId, state.setLists[state.setListId])
+      this.getters.SetList.songs.splice(newSong.index, 0, newSong)
+      persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
     editSong(state, updatedSong) {
-      state.setLists[state.setListId].songs.splice(
+      this.getters.SetList.songs.splice(
         updatedSong.index,
         1,
         updatedSong
       )
+      persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
     deleteSong(state, id) {
       this.getters.setList.songs = this.getters.setList.songs.filter(
         song => song.id !== id
       )
-    },
-    draggedItem(state, draggedItem) {
-      state.draggedItem = draggedItem
-      state.isDragging = true
-      state.wasMoved = ''
+      persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
     draggedItemEnd(state) {
       if (
@@ -397,7 +394,16 @@ const store = new Vuex.Store({
       state.isDragging = false
       state.draggingOverItemId = ''
       state.targetSlot = -1
-      persistSetList(state.setListId, this.getters.setList.songs)
+      persistSetList(state.setListId, { songs: this.getters.setList.songs })
+    },
+    /* Temporary state vars */
+    scroll(state, isScrolling) {
+      state.isScrolling = isScrolling
+    },
+    draggedItem(state, draggedItem) {
+      state.draggedItem = draggedItem
+      state.isDragging = true
+      state.wasMoved = ''
     },
     itemWasMoved(state) {
       state.wasMoved = ''

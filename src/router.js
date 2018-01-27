@@ -6,8 +6,7 @@ const router = new VueRouter({
   mode: 'history',
   routes: [
     { path: '/', component: Start },
-    { path: '/login', component: Login }
-    //    { path: '/success', component: AuthSuccess }
+    { path: '/login', component: Login },
   ]
 })
 export default router

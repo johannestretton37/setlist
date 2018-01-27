@@ -22,6 +22,9 @@ new Vue({
     firebase.initializeApp(config)
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
+        user.getIdToken().then(token => {
+          console.log('accessToken received...')
+        })
         store.commit('loggedIn', {
           uid: user.uid,
           name: user.displayName,

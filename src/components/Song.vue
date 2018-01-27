@@ -143,11 +143,14 @@ export default {
         if (Math.abs(distanceY) > Math.abs(distanceX)) console.log('scroll')
         if (Math.abs(distanceY) < Math.abs(distanceX)) {
           // SWIPE LEFT/RIGHT
-          if (distanceX > 0) {
+          if (distanceX > 50) {
             // LEFT
             e.currentTarget.parentNode.classList.add('delete')
-          } else {
+          } else if (distanceX < -50) {
             // RIGHT
+            e.currentTarget.parentNode.classList.remove('delete')
+          } else {
+            console.log('Swiped left/right', distanceX, 'px')
           }
         }
         if (Math.abs(distanceY) > 50) {

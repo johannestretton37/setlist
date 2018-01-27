@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>{{ setList ? setList.title : this.newSetListTitle || 'Welcome' }}</h2>
+    <h2>{{ setList ? setList.title : this.newSetListTitle || 'Create your first SetList' }}</h2>
     <div class="new-song-form">
       <transition
         name="fade-right-to-left"
