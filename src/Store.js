@@ -397,6 +397,7 @@ const store = new Vuex.Store({
       state.isDragging = false
       state.draggingOverItemId = ''
       state.targetSlot = -1
+      persistSetList(state.setListId, this.getters.setList.songs)
     },
     itemWasMoved(state) {
       state.wasMoved = ''
