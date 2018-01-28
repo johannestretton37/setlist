@@ -289,6 +289,9 @@ const store = new Vuex.Store({
   getters: {
     setList: state => {
       return state.setLists[state.setListId] || null
+    },
+    setLists: state => {
+      return state.setLists || {}
     }
   },
   actions: {
@@ -355,18 +358,14 @@ const store = new Vuex.Store({
       persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
     editSong(state, updatedSong) {
-      this.getters.SetList.songs.splice(
-        updatedSong.index,
-        1,
-        updatedSong
-      )
-      persistSetList(state.setListId, { songs: this.getters.setList.songs })
+      this.getters.SetList.songs.splice(updatedSong.index, 1, updatedSong)
+      persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
     deleteSong(state, id) {
       this.getters.setList.songs = this.getters.setList.songs.filter(
         song => song.id !== id
       )
-      persistSetList(state.setListId, { songs: this.getters.setList.songs })
+      persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
     draggedItemEnd(state) {
       if (
@@ -394,7 +393,7 @@ const store = new Vuex.Store({
       state.isDragging = false
       state.draggingOverItemId = ''
       state.targetSlot = -1
-      persistSetList(state.setListId, { songs: this.getters.setList.songs })
+      persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
     /* Temporary state vars */
     scroll(state, isScrolling) {

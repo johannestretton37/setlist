@@ -1,20 +1,22 @@
 <template>
-  <div class="songs">
-    <transition-group tag="ul" class="song-items-container" name="rearrange">
-      <Song
-        v-for="(song, order) in songs"
-        :order="order + 1"
-        :key="song.index"
-        :song="song">
-      </Song>
-      <hr :key="'divider'">
-      <SongsTotal
-        v-if="songs.length > 0"
-        :key="'total'"
-        :songs="songs"></SongsTotal>
-    </transition-group>
-    <div id="draggedItemPlaceholder" v-if="isDragging">
-      <Song :song="draggedItemPlaceholder"></Song>
+  <div class="songs-container">
+    <div class="songs">
+      <transition-group tag="ul" class="song-items-container" name="rearrange">
+        <Song
+          v-for="(song, order) in songs"
+          :order="order + 1"
+          :key="song.index"
+          :song="song">
+        </Song>
+        <hr :key="'divider'">
+        <SongsTotal
+          v-if="songs.length > 0"
+          :key="'total'"
+          :songs="songs"></SongsTotal>
+      </transition-group>
+      <div id="draggedItemPlaceholder" v-if="isDragging">
+        <Song :song="draggedItemPlaceholder"></Song>
+      </div>
     </div>
   </div>
 </template>
@@ -54,11 +56,20 @@ hr {
   border-bottom: 1px solid #eee;
 }
 
-.songs {
-  ul {
-    overflow: hidden;
-    li {
-      position: relative;
+.songs-container {
+  .songs {
+    border-radius: 5px;
+    background: #fff;
+    margin: auto;
+    .song-items-container {
+      padding-top: 30px;
+      padding-bottom: 30px;
+    }
+    ul {
+      overflow: hidden;
+      li {
+        position: relative;
+      }
     }
   }
 }

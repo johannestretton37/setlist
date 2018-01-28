@@ -1,8 +1,11 @@
 <template>
   <div>
-    <h2>{{ setList ? setList.title : this.newSetListTitle || 'Create your first SetList' }}</h2>
+    <div class="setlist-container">
+      <h2 v-if="setList !== null">{{setList.title}}</h2>
+      <Songs v-if="setList" :songs="setList.songs"></Songs>
+    </div>
     <div class="new-song-form">
-      <transition
+      <!-- <transition
         name="fade-right-to-left"
         v-on:enter="onEnter"
         v-on:after-enter="afterEnter">
@@ -14,9 +17,8 @@
           <h3 style="grid-area: header">New SetList</h3>
           <input type="text" style="grid-area: title" class="center" autofocus v-model="newSetListTitle" placeholder="Name" />
           <button style="grid-area: submit">Create SetList</button>
-        </form>
+        </form> -->
         <form
-          v-else
           key="addNewSong"
           class="add-song-form"
           @submit.prevent="addSong">
@@ -26,9 +28,8 @@
           <input type="text" @input="handleInput" data-model="songArtist" style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
           <button style="grid-area: submit">Add song to list</button>
         </form>
-      </transition>
+      <!-- </transition> -->
     </div>
-    <Songs v-if="setList" :songs="setList.songs"></Songs>
   </div>
 </template>
 
@@ -56,11 +57,11 @@ export default {
     }
   },
   methods: {
-    createSetList() {
-      let newSetList = new SetList(this.newSetListTitle)
-      this.$store.dispatch('createSetList', newSetList)
-      this.resetForm()
-    },
+    // createSetList() {
+    //   let newSetList = new SetList(this.newSetListTitle)
+    //   this.$store.dispatch('createSetList', newSetList)
+    //   this.resetForm()
+    // },
     handleInput(e) {
       this.startIdleTimer(e.target)
       const input = e.target.value
@@ -206,8 +207,12 @@ button {
   color: rgb(19, 46, 61);
 }
 
+.setlist-container {
+  background: #e4f2f3;
+  padding: 10px;
+}
 .song-items-container {
-  margin: 2em auto;
+  margin: auto;
   @extend .medium-width;
   .song-item-container {
     display: grid;
