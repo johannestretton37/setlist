@@ -114,7 +114,7 @@ const getSetLists = async uid => {
 const persistCurrentSetListId = (uid, setListId) => {
   return new Promise(async resolve => {
     const usersRef = await getUsersRef()
-    return usersRef.doc(uid).set(
+    await usersRef.doc(uid).set(
       {
         currentSetListId: setListId
       },
@@ -122,6 +122,7 @@ const persistCurrentSetListId = (uid, setListId) => {
         merge: true
       }
     )
+    return resolve()
   })
 }
 
@@ -144,6 +145,8 @@ const allowedFields = ['title', 'subtitle', 'users']
  */
 const persistSetList = (setListId, propsToChange) => {
   return new Promise(async resolve => {
+    console.log('PERSISTING', setListId)
+    console.table(propsToChange)
     const setListsRef = await getSetListsRef()
     if (!setListsRef) return resolve(undefined)
     let setListDoc = {}
@@ -154,6 +157,7 @@ const persistSetList = (setListId, propsToChange) => {
             console.log('ignore users for now')
             break
           default:
+            console.log(key, 'modified locally to ->', val)
             setListDoc[key] = val
             break
         }
@@ -177,36 +181,37 @@ const persistSetList = (setListId, propsToChange) => {
         storedSong.id = snapshot.id
         storedSongs.push(storedSong)
       })
-
+      console.log('storedSongs array:')
+      console.table(storedSongs)
       let songsToStore = {}
       let i = 0
       storedSongs.forEach(storedSong => {
         const localSong = propsToChange.songs[i]
         if (localSong) {
           // Compare
-          console.log('comparing:')
-          console.table([storedSong.index, localSong.index])
+          console.log('comparing stored to local:')
+          console.table([storedSong, localSong])
           if (
             storedSong.id !== localSong.id ||
             storedSong.index !== localSong.index
           ) {
-            console.log('These are not the same:')
-            console.table([storedSong, localSong])
-            console.log('DELETE stored song')
+            console.log('The above are not the same')
+            console.log('batch.DELETE stored song with key', i)
             let docRef = setListsRef
               .doc(setListId)
               .collection('songs')
               .doc(`${i}`)
             batch.delete(docRef)
             let { id, index, ...rest } = localSong
+            console.log('batch.ADD localSong', { index: i, ...rest })
             batch.set(docRef, { index: i, ...rest })
           }
+          i++
         }
-        i++
       })
-
-      if (propsToChange.songs.length > i) {
-        let songsToAdd = propsToChange.songs.splice(i)
+      console.log('Looped through storedSongs, i =', i)
+      let songsToAdd = propsToChange.songs.slice(i)
+      if (songsToAdd.length > 0) {
         console.log(songsToAdd.length, 'songs were added:', songsToAdd)
         songsToAdd.forEach((song, x) => {
           console.log('Add song with index', x + i)
@@ -225,10 +230,18 @@ const persistSetList = (setListId, propsToChange) => {
   })
 }
 
+let unsubscribeSetListWatch
+let unsubscribeSongsWatch
 const watchSetList = setListId => {
-  getSetListsRef().then(ref => {
+  // Start watching setList with passed id
+  return getSetListsRef().then(ref => {
+    // Stop watching any open setLists
+    if (unsubscribeSetListWatch !== undefined) {
+      console.log('unsubscribing from setlist watch')
+      unsubscribeSetListWatch()
+    }
     // Watch setList
-    ref.doc(setListId).onSnapshot(setListDoc => {
+    unsubscribeSetListWatch = ref.doc(setListId).onSnapshot(setListDoc => {
       if (!setListDoc.metadata.fromCache) {
         console.log('[SETLIST]  === UPDATE UI ===')
         const setList = setListDoc.data()
@@ -239,7 +252,12 @@ const watchSetList = setListId => {
       }
     })
     // Watch setLists's songs
-    ref
+    // Stop watching any open songs
+    if (unsubscribeSongsWatch !== undefined) {
+      console.log('unsubscribing from songs watch')
+      unsubscribeSongsWatch()
+    }
+    unsubscribeSongsWatch = ref
       .doc(setListId)
       .collection('songs')
       .onSnapshot(snapshot => {
@@ -250,21 +268,26 @@ const watchSetList = setListId => {
               console.log('New song: ', change.doc.data())
               const songDoc = change.doc.data()
               let song = Song.songFromDocData(songDoc, songDoc.id)
-              console.log(store)
-              store.commit('addSong', song)
+              console.log('addSong', song)
+              store.commit('addSong', { newSong: song, persist: false })
             }
             if (change.type === 'modified') {
               const songDoc = change.doc.data()
               let song = Song.songFromDocData(songDoc, songDoc.id)
-              store.commit('editSong', song)
               console.log('Modified song: ', song)
+              store.commit('editSong', { updatedSong: song, persist: false })
             }
             if (change.type === 'removed') {
               const songDoc = change.doc.data()
               let song = Song.songFromDocData(songDoc, songDoc.id)
-              store.commit('deleteSong', song.id)
               console.log('Removed song: ', song)
+              store.commit('deleteSong', { id: song.id, persist: false })
             }
+            // if (change.doc.metadata.hasPendingWrites) {
+            //   debugger
+            // } else {
+            //   debugger
+            // }
           } else {
             console.log('[SONGS] local update only')
           }
@@ -308,7 +331,7 @@ const store = new Vuex.Store({
       const setList = newSetListDoc.data()
       const setListId = newSetListRef.id
       commit('loadSetList', setList)
-      commit('openSetList', setListId)
+      commit('updateSetListId', setListId)
     },
     getUserSetLists: async ({ state, commit }) => {
       let setLists = await getSetLists(state.user.uid)
@@ -325,10 +348,17 @@ const store = new Vuex.Store({
           }
         }
         commit('loadSetLists', setLists)
-        commit('openSetList', setListId)
+        commit('updateSetListId', setListId)
+        watchSetList(setListId)
       } else {
         console.warn('No setlists found')
       }
+    },
+    openSetList: async ({ state, commit }, setListId) => {
+      commit('closeSetList')
+      // await persistCurrentSetListId(state.user.uid, setListId)
+      await watchSetList(setListId)
+      commit('updateSetListId', setListId)
     }
   },
   mutations: {
@@ -348,24 +378,43 @@ const store = new Vuex.Store({
     loadSetList(state, setList) {
       state.setLists[setList.id] = setList
     },
-    openSetList(state, setListId) {
-      watchSetList(setListId)
+    closeSetList(state) {
+      state.setListId = null
+    },
+    updateSetListId(state, setListId) {
       state.setListId = setListId
     },
     /* Song manipulation */
-    addSong(state, newSong) {
-      this.getters.SetList.songs.splice(newSong.index, 0, newSong)
-      persistSetList(state.setListId, { songs: this.getters.setList.songs })
+    addSong(state, { newSong, persist }) {
+      console.log('Will maybe add song, persist =', persist)
+      if (!persist) {
+        let localSong = this.getters.setList.songs[newSong.index]
+        if (
+          localSong.title === newSong.title &&
+          localSong.duration === newSong.duration &&
+          localSong.artist === newSong.artist &&
+          localSong.index === newSong.index
+        ) {
+          // Do nothing
+        } else {
+          this.getters.setList.songs.splice(newSong.index, 0, newSong)
+        }
+      } else {
+        this.getters.setList.songs.splice(newSong.index, 0, newSong)
+        persistSetList(state.setListId, { songs: this.getters.setList.songs })
+      }
     },
-    editSong(state, updatedSong) {
-      this.getters.SetList.songs.splice(updatedSong.index, 1, updatedSong)
-      persistSetList(state.setListId, { songs: this.getters.setList.songs })
+    editSong(state, { updatedSong, persist }) {
+      this.getters.setList.songs.splice(updatedSong.index, 1, updatedSong)
+      if (persist)
+        persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
-    deleteSong(state, id) {
+    deleteSong(state, { id, persist }) {
       this.getters.setList.songs = this.getters.setList.songs.filter(
         song => song.id !== id
       )
-      persistSetList(state.setListId, { songs: this.getters.setList.songs })
+      if (persist)
+        persistSetList(state.setListId, { songs: this.getters.setList.songs })
     },
     draggedItemEnd(state) {
       if (

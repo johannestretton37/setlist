@@ -4,7 +4,7 @@ service cloud.firestore {
       allow create: if request.auth.uid != null;
       allow read, write, delete: if resource.data.users[request.auth.uid] == true;
       match /songs/{song=**} {
-      	allow read, write: if true;
+      	allow read, write: if get(/databases/$(database)/documents/setlists/$(setlist)).data.users[request.auth.uid] == true;
       }
     }
     match /users/{userId} {

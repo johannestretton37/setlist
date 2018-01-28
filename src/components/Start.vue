@@ -74,7 +74,7 @@ export default {
       this.resetForm()
     },
     openSetList(setListId) {
-      this.$store.commit('openSetList', setListId)
+      this.$store.dispatch('openSetList', setListId)
     },
     resetForm() {
       this.newSetListTitle = ''
