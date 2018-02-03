@@ -202,9 +202,10 @@ const persistSetList = (setListId, propsToChange) => {
               .collection('songs')
               .doc(`${i}`)
             batch.delete(docRef)
-            let { id, index, ...rest } = localSong
-            console.log('batch.ADD localSong', { index: i, ...rest })
-            batch.set(docRef, { index: i, ...rest })
+            let localSongSerialized = localSong.toStorage()
+            localSongSerialized.index = i
+            console.log('batch.ADD localSongSerialized', localSongSerialized)
+            batch.set(docRef, localSongSerialized)
           }
           i++
         }
@@ -215,12 +216,13 @@ const persistSetList = (setListId, propsToChange) => {
         console.log(songsToAdd.length, 'songs were added:', songsToAdd)
         songsToAdd.forEach((song, x) => {
           console.log('Add song with index', x + i)
-          let { id, index, ...rest } = song
+          let localSongSerialized = song.toStorage()
+          localSongSerialized.index = x + i
           let docRef = setListsRef
             .doc(setListId)
             .collection('songs')
             .doc(`${x + i}`)
-          batch.set(docRef, { index: x + i, ...rest })
+          batch.set(docRef, localSongSerialized)
         })
       } else {
         console.log('No more songs...', propsToChange.songs)
@@ -266,20 +268,20 @@ const watchSetList = setListId => {
             console.log('[SONGS]  === UPDATE UI ===')
             if (change.type === 'added') {
               console.log('New song: ', change.doc.data())
-              const songDoc = change.doc.data()
-              let song = Song.songFromDocData(songDoc, songDoc.id)
+              const songDocData = change.doc.data()
+              let song = Song.songFromDocData(songDocData, change.doc.id)
               console.log('addSong', song)
               store.commit('addSong', { newSong: song, persist: false })
             }
             if (change.type === 'modified') {
-              const songDoc = change.doc.data()
-              let song = Song.songFromDocData(songDoc, songDoc.id)
+              const songDocData = change.doc.data()
+              let song = Song.songFromDocData(songDocData, change.doc.id)
               console.log('Modified song: ', song)
               store.commit('editSong', { updatedSong: song, persist: false })
             }
             if (change.type === 'removed') {
-              const songDoc = change.doc.data()
-              let song = Song.songFromDocData(songDoc, songDoc.id)
+              const songDocData = change.doc.data()
+              let song = Song.songFromDocData(songDocData, change.doc.id)
               console.log('Removed song: ', song)
               store.commit('deleteSong', { id: song.id, persist: false })
             }
@@ -386,35 +388,58 @@ const store = new Vuex.Store({
     },
     /* Song manipulation */
     addSong(state, { newSong, persist }) {
-      console.log('Will maybe add song, persist =', persist)
+      console.log('Will maybe add song', newSong, 'persist =', persist)
       if (!persist) {
+        // If persist is false, that means that this change came from database
+        // Get local song
         let localSong = this.getters.setList.songs[newSong.index]
-        if (
-          localSong.title === newSong.title &&
-          localSong.duration === newSong.duration &&
-          localSong.artist === newSong.artist &&
-          localSong.index === newSong.index
-        ) {
+        if (localSong !== undefined && localSong.isEqual(newSong)) {
           // Do nothing
         } else {
+          // Update UI
           this.getters.setList.songs.splice(newSong.index, 0, newSong)
         }
       } else {
+        // Update UI and persist changes to database
         this.getters.setList.songs.splice(newSong.index, 0, newSong)
         persistSetList(state.setListId, { songs: this.getters.setList.songs })
       }
     },
     editSong(state, { updatedSong, persist }) {
-      this.getters.setList.songs.splice(updatedSong.index, 1, updatedSong)
-      if (persist)
+      if (!persist) {
+        // If persist is false, that means that this change came from database
+        // Get local song
+        let localSong = this.getters.setList.songs[updatedSong.index]
+        if (localSong !== undefined && localSong.isEqual(updatedSong)) {
+          // Do nothing
+        } else {
+          // Update UI
+          this.getters.setList.songs.splice(updatedSong.index, 1, updatedSong)
+        }
+      } else {
+        // Update UI and persist changes to database
+        this.getters.setList.songs.splice(updatedSong.index, 1, updatedSong)
         persistSetList(state.setListId, { songs: this.getters.setList.songs })
+      }
     },
     deleteSong(state, { id, persist }) {
-      this.getters.setList.songs = this.getters.setList.songs.filter(
-        song => song.id !== id
-      )
-      if (persist)
+      if (!persist) {
+        // If persist is false, that means that this change came from database
+        // Get local song
+        let localSong = this.getters.setList.songs.find(song => song.id === id)
+        if (localSong !== undefined) {
+          // Delete song from UI
+          this.getters.setList.songs = this.getters.setList.songs.filter(
+            song => song.id !== id
+          )
+        }
+      } else {
+        // Update UI and persist changes to database
+        this.getters.setList.songs = this.getters.setList.songs.filter(
+          song => song.id !== id
+        )
         persistSetList(state.setListId, { songs: this.getters.setList.songs })
+      }
     },
     draggedItemEnd(state) {
       if (

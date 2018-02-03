@@ -98,8 +98,10 @@ export default {
         this.toSeconds(this.newSongDuration)
       )
       newSong.id = `${this.setList.songs.length}`
-      this.$store.commit('addSong', { newSong, persist: true })
-      this.resetForm()
+      if (newSong.isValid()) {
+        this.$store.commit('addSong', { newSong, persist: true })
+        this.resetForm()
+      }
     },
     resetForm() {
       this.newSetListTitle = ''

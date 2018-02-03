@@ -4,14 +4,23 @@
       <transition-group tag="ul" class="song-items-container" name="rearrange">
         <Song
           v-for="(song, order) in songs"
+          v-if="!song.isEncore"
           :order="order + 1"
           :key="song.index"
           :song="song">
         </Song>
-        <hr :key="'divider'">
+        <div class="divider encore" v-if="hasEncores" :key="'encore-divider'"></div>
+        <Song
+          v-for="(song, order) in songs"
+          v-if="song.isEncore"
+          :order="order + 1"
+          :key="song.index"
+          :song="song">
+        </Song>
+        <div class="divider total" :key="'total'"></div>
         <SongsTotal
           v-if="songs.length > 0"
-          :key="'total'"
+          :key="'total-divider'"
           :songs="songs"></SongsTotal>
       </transition-group>
       <div id="draggedItemPlaceholder" v-if="isDragging">
@@ -45,15 +54,44 @@ export default {
     },
     isDragging() {
       return this.$store.state.isDragging
+    },
+    hasEncores() {
+      return this.songs.filter(song => song.isEncore).length > 0
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-hr {
-  border: none;
-  border-bottom: 1px solid #eee;
+div {
+  &.divider {
+    width: 100%;
+    margin: 10px auto;
+    border: none;
+    &.encore {
+      position: relative;
+      height: 1px;
+      border-bottom: 1px solid #eee;
+      &:after {
+        display: block;
+        position: absolute;
+        padding: 0;
+        top: -4px;
+        left: 40%;
+        width: 20%;
+        font-size: 10px;
+        line-height: 10px;
+        text-align: center;
+        color: rgb(135, 144, 161);
+        background-color: #fff;
+        content: 'ENCORES';
+      }
+    }
+    &.total {
+      height: 3px;
+      border-bottom: 3px double #eee;
+    }
+  }
 }
 
 .songs-container {
@@ -63,7 +101,7 @@ hr {
     margin: auto;
     .song-items-container {
       padding-top: 30px;
-      padding-bottom: 30px;
+      padding-bottom: 11px;
     }
     ul {
       overflow: hidden;
