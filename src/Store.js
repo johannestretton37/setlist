@@ -246,9 +246,10 @@ const watchSetList = setListId => {
     unsubscribeSetListWatch = ref.doc(setListId).onSnapshot(setListDoc => {
       if (!setListDoc.metadata.fromCache) {
         console.log('[SETLIST]  === UPDATE UI ===')
-        const setList = setListDoc.data()
+        const setListData = setListDoc.data()
+        let setList = SetList.setListFromDocData(setListData, setListDoc.id)
         console.log(setList)
-        store.commit('loadSetList', setList)
+        store.commit('editSetList', { editedSetList: setList, persist: false })
       } else {
         console.log('[SETLIST] local update only')
       }
@@ -379,6 +380,13 @@ const store = new Vuex.Store({
     },
     loadSetList(state, setList) {
       state.setLists[setList.id] = setList
+    },
+    editSetList(state, { editedSetList, persist }) {
+      let localSetList = this.getters.setList
+      // extract songs, we'll handle them separately
+      let { songs, ...edits } = editedSetList
+      let setList = Object.assign(localSetList, edits)
+      // state.setLists[setList.id] = setList
     },
     closeSetList(state) {
       state.setListId = null

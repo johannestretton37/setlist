@@ -1,34 +1,23 @@
 <template>
   <div>
     <div class="setlist-container">
-      <h2 v-if="setList !== null">{{setList.title}}</h2>
-      <Songs v-if="setList" :songs="setList.songs"></Songs>
+      <template v-if="setList">
+        <h2>{{setList.title}}</h2>
+        <p><i>{{setList.subtitle}}</i></p>
+        <Songs :songs="setList.songs"></Songs>
+      </template>
     </div>
     <div class="new-song-form">
-      <!-- <transition
-        name="fade-right-to-left"
-        v-on:enter="onEnter"
-        v-on:after-enter="afterEnter">
-        <form
-          v-if="setList === null"
-          key="createSetList"
-          class="add-setlist-form"
-          @submit.prevent="createSetList">
-          <h3 style="grid-area: header">New SetList</h3>
-          <input type="text" style="grid-area: title" class="center" autofocus v-model="newSetListTitle" placeholder="Name" />
-          <button style="grid-area: submit">Create SetList</button>
-        </form> -->
-        <form
-          key="addNewSong"
-          class="add-song-form"
-          @submit.prevent="addSong">
-          <h3 style="grid-area: header">Add new song</h3>
-          <input type="text" @input="handleInput" data-model="songTitle" style="grid-area: title" class="center" autofocus v-model="newSongTitle" placeholder="Song Title" />
-          <input type="text" @input="handleInput" data-model="songDuration" style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
-          <input type="text" @input="handleInput" data-model="songArtist" style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
-          <button style="grid-area: submit">Add song to list</button>
-        </form>
-      <!-- </transition> -->
+      <form
+        key="addNewSong"
+        class="add-song-form"
+        @submit.prevent="addSong">
+        <h3 style="grid-area: header">Add new song</h3>
+        <input type="text" @input="handleInput" data-model="songTitle" style="grid-area: title" class="center" autofocus v-model="newSongTitle" placeholder="Song Title" />
+        <input type="text" @input="handleInput" data-model="songDuration" style="grid-area: duration" class="center duration" v-model="newSongDuration" placeholder="0:00" />
+        <input type="text" @input="handleInput" data-model="songArtist" style="grid-area: artist" class="center" v-model="newSongArtist" placeholder="Artist (optional)" />
+        <button style="grid-area: submit">Add song to list</button>
+      </form>
     </div>
   </div>
 </template>
