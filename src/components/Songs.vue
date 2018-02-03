@@ -9,7 +9,7 @@
           :key="song.index"
           :song="song">
         </Song>
-        <div class="divider encore" v-if="hasEncores" :key="'encore-divider'"></div>
+        <div class="divider encore" v-if="hasEncores" :key="'encoreDivider'"></div>
         <Song
           v-for="(song, order) in songs"
           v-if="song.isEncore"
@@ -17,10 +17,10 @@
           :key="song.index"
           :song="song">
         </Song>
-        <div class="divider total" :key="'total'"></div>
+        <div class="divider total" :key="'totalDivider'"></div>
         <SongsTotal
           v-if="songs.length > 0"
-          :key="'total-divider'"
+          :key="'total'"
           :songs="songs"></SongsTotal>
       </transition-group>
       <div id="draggedItemPlaceholder" v-if="isDragging">

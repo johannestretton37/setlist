@@ -8,6 +8,10 @@ class Song {
     this.artist = artist
     this.duration = duration
     this.isEncore = isEncore || false
+    /**
+     * Replace this.isEncore property with a dividerType that can be dragged around
+     */
+    this.isEncoreDivider = false
   }
 
   isValid = () => {

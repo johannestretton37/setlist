@@ -11,7 +11,8 @@
     "server":
       "NODE_ENV=development nodemon backend/src/index.js --exec babel-node --presets env",
     "start": "node backenddist/index.js",
-    "release": "git push && git push heroku master",
+    "release:heroku": "git push && git push heroku master",
+    "release": "yarn run build && firebase deploy",
     "unit": "jest --config test/unit/jest.conf.js --coverage",
     "e2e": "node test/e2e/runner.js",
     "test": "yarn run unit && yarn run e2e",

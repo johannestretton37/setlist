@@ -46,8 +46,10 @@ yarn test
 ```bash
 # Add and commit to git, this will automatically run all tests and then build before committing
 git add . && git commit -m "<commit message here>"
-# If everything succeeds - deploy
+# If everything succeeds - deploy to firebase
 yarn release
+# Alternatively deploy to heroku instead
+yarn release:heroku
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
