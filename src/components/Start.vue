@@ -29,14 +29,16 @@
         <button @click.prevent="showCreateSetListForm = !showCreateSetListForm" style="grid-area: cancel">Cancel</button>
       </form>
       <ul>
-        <li v-for="(setList, id) in setLists" :key="id" v-if="setListId !== id">
-          <button @click="openSetList(id)">Open {{setList.title}}</button>
+        <li v-for="(setList, id) in setLists" :key="id">
+          <button v-if="setListId !== id" @click="openSetList(id)">Open {{setList.title}}</button>
+          <button @click="shareSetList(id)">Share {{setList.title}}</button>
         </li>
       </ul>
     </div>
     <hr>
     <SetList></SetList>
     <img id="dragImg" :src="pixel">
+    <Notifications></Notifications>
   </div>
 </template>
 
@@ -44,6 +46,7 @@
 import { mapState, mapGetters } from 'vuex'
 import SetListModel from '../Models/SetList'
 import SetList from './SetList'
+import Notifications from './Notifications'
 import Songs from './Songs'
 import Scroller from './Scroller'
 import pixel from '../assets/pixel.png'
@@ -76,6 +79,13 @@ export default {
     openSetList(setListId) {
       this.$store.dispatch('openSetList', setListId)
     },
+    shareSetList(setListId) {
+      let invitedEmail = prompt('Enter email to your collaborator')
+      this.$store.dispatch('inviteCollaboratorToSetList', {
+        setListId,
+        invitedEmail
+      })
+    },
     resetForm() {
       this.newSetListTitle = ''
       document.activeElement.blur()
@@ -88,7 +98,8 @@ export default {
   components: {
     SetList,
     Songs,
-    Scroller
+    Scroller,
+    Notifications
   }
 }
 </script>
